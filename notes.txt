@@ -1,0 +1,182 @@
+Smart Kitchen Timer - Design & Development Notes
+================================================
+
+Timer appearance: H:MM:SS
+
+Two timer displays.
+
+Buttons per timer:
+    H:      +1 hour, stops timer
+    M:      +1 minute, stops timer
+    S:      +1 second, stops timer
+    start:  toggle timer start/stop
+
+Combined button actions:
+    start and any of H, M, S buttons: stops & resets timer to 0:00:00.
+    start1 + start2: toggle timer mode
+
+Timer modes:
+    Independent: each timer can be started & stopped independently.
+    Chained: timer 1 runs first; on completion, triggers timer 2.
+        Resetting either timer resets both.
+        Actions that stop a timer stop both if running.
+    
+Alarm state:
+    On reaching 0:00:00, a timer stops, emits an audible alarm and its display flashes.
+    Pressing any button for that timer cancels the alarm, sets the timer back to starting value.
+
+Structure:
+    2 x timers
+    1 x timer controller
+    1 x alarm
+    1 x input manager
+    
+Timer:
+    States:
+        STOPPED
+        RUNNING
+        PAUSED
+        ALARM
+    Events:
+        Button events:
+            H_b
+            M_b
+            S_b
+            start_b
+            start_b + H_b/M_b/S_b
+        Control events:
+            start
+            stop
+            update
+            reset
+            alarm
+    Data:
+        Current state
+        Current H, M, S
+        Starting H, M, S
+    Behaviour:
+        Global:
+            reset:                  set H, M and S to zero, change to STOPPED state
+            start_b + H_b/M_b/S_b:  send timer X reset event to controller
+        
+        STOPPED:
+            H_b, M_b, S_b:          increment corresponding data and refresh display
+            start_b:                send timer X start event to controller
+            start:                  go to RUNNING state
+            update:                 refresh display
+            
+        RUNNING:
+            start_b, H_b, M_b, S_b: send timer X stop event to controller
+            update:                 count down timer, refresh display - if zero, send timer X done to controller
+            stop:                   go to PAUSED state
+            alarm:                  go to ALARM state
+            
+        PAUSED:
+            start_b, H_b, M_b, S_b: send timer X start event to controller
+            update:                 refresh display
+            start:                  go to RUNNING state
+            
+        ALARM:
+            update:                 flash and refresh display
+            start_b, H_b, M_b, S_b: set H, M, S to starting values, go to STOPPED state
+        
+Timer Controller:
+    States:
+        INDEPENDENT
+        CHAINED
+    Events:
+        Button events:
+            start_b1+start_b2
+        Timer events:
+            timer 1 start
+            timer 2 start
+            timer 1 stop
+            timer 2 stop
+            timer 1 reset
+            timer 2 reset
+            timer 1 done
+            timer 2 done
+    Data:
+        current state
+    Behaviour:
+        Global:
+            any:                    send clear to Alarm
+        
+        INDEPENDENT:
+            timer X start:          send start to timer X
+            timer X stop:           send stop to timer X
+            timer X reset:          send reset to timer X
+            timer X done:           send trigger to Alarm, send alarm to timer X
+            
+        CHAINED:
+            timer X start:          if timer 1 running, send start to timer 1
+                                    if timer 2 running, send start to timer 2
+            timer X stop:           if timer 1 running, send stop to timer 1
+                                    if timer 2 running, send stop to timer 2
+            timer X reset:          send reset to timer 1 and timer 2
+            timer X done:           if X == 1:
+                                        send trigger to Alarm, send alarm to timer 1, send start to timer 2
+                                    if X == 2:
+                                        send trigger to Alarm, send alarm to timer 2        
+
+Alarm:
+    States:
+        SILENT
+        AUDIBLE
+    Events:
+        trigger
+        clear
+    Behaviour:
+        Global:
+        
+        SILENT:
+            trigger:    start audible alarm, go to AUDIBLE state
+            
+        AUDIBLE:
+            clear:      stop audible alarm, go to SILENT state
+
+Total events - 19:
+    alarm trigger       Alarm control
+    alarm clear
+    timer 1 start       Timer controller notifications
+    timer 2 start
+    timer 1 stop
+    timer 2 stop
+    timer 1 reset
+    timer 2 reset
+    timer 1 done
+    timer 2 done
+    timer start         Timer behaviour control
+    timer stop
+    timer update        Model as update handler func
+    timer reset
+    timer alarm
+    H_b                 Treat button combos as bitwise or of button events
+    M_b
+    S_b
+    start_b
+    
+State Machine Design
+    State:              
+        enter func ptr
+        event handler func ptr
+        update handler func ptr
+        exit func ptr
+    States:
+        array of structures
+    Event handler:
+        switch statement on event flag combos.
+    Functions:
+        get state
+        set state
+
+Input Manager
+    Polls GPIO buttons/reads interrupt results
+    Debounces and records combos
+    Sends button events to appropriate timer
+    
+Count-down timers
+    Use an MRT for each.
+        Set value to full duration & start; read back value & convert to H:MM:SS for display, use callback to trigger done.
+        Set a repeat MRT to expire after 1 second; use callback on that to update timer counts (simpler, less code?)
+
