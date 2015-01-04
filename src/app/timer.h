@@ -50,6 +50,7 @@ class Timer {
         State state_;
         
         bool updated_;
+        bool visible_;
         
         friend void TimerInterruptHandler(void);
 };

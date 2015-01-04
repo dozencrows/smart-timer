@@ -8,8 +8,9 @@
 #include "LPC8xx.h"
 #include "util/lcd.h"
 
-#define MAX_TIMER_INSTANCES 2
-#define MRT_TIMER           1
+#define MAX_TIMER_INSTANCES     2
+#define MRT_TIMER               1
+#define TIME_TEXT_BUFFER_LEN    8
 
 //----------------------------------------------------------------------------------------
 // Utilities
@@ -57,6 +58,7 @@ Timer::Timer() {
 
     state_ = STOPPED;
     updated_ = false;
+    visible_ = true;
     
     if (timer_instance_count < MAX_TIMER_INSTANCES) {
         timer_instances[timer_instance_count++] = this;
@@ -82,10 +84,13 @@ void Timer::SetStartTime(uint8_t hours, uint8_t minutes, uint8_t seconds) {
 }
 
 void Timer::Start() {
-    state_ = RUNNING;
+    if (current_time_.all > 0) {
+        state_ = RUNNING;
+    }
 }
 
 void Timer::Stop() {
+    visible_            = true;
     state_ = PAUSED;
 }
 
@@ -93,6 +98,7 @@ void Timer::Reset() {
     current_time_.all   = start_time_.all;
     updated_            = true;
     state_              = STOPPED;
+    visible_            = true;
 }
 
 void Timer::Tick() {
@@ -116,19 +122,30 @@ void Timer::Tick() {
         
         updated_ = true;
     }
+    else if (state_ == ALARM) {
+        visible_ = !visible_;
+        updated_ = true;
+    }
 }
 
 void Timer::Update() {    
     if (updated_) {
-        char time_text[8];
+        char time_text[TIME_TEXT_BUFFER_LEN];
+
+        if (visible_) {        
+            time_text[0] = current_time_.hours + '0';
+            time_text[1] = ':';
+            Time2DigitsToAscii(current_time_.minutes, time_text + 2);
+            time_text[4] = ':';
+            Time2DigitsToAscii(current_time_.seconds, time_text + 5);
+        }
+        else {
+            uint32_t* blank_text = (uint32_t*)time_text;
+            blank_text[0] = 0x20202020;
+            blank_text[1] = 0x20202020;
+        }
         
-        time_text[0] = current_time_.hours + '0';
-        time_text[1] = ':';
-        Time2DigitsToAscii(current_time_.minutes, time_text + 2);
-        time_text[4] = ':';
-        Time2DigitsToAscii(current_time_.seconds, time_text + 5);
         time_text[7] = '\0';
-        
         lcdMoveTo(x_, y_);
         lcdPuts(time_text);
         updated_ = false;
