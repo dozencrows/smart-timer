@@ -12,6 +12,21 @@
 #define MRT_TIMER           1
 
 //----------------------------------------------------------------------------------------
+// Utilities
+//
+void Time2DigitsToAscii(uint8_t byte, char* str) {
+    uint8_t digit_0 = '0';
+    
+    while (byte > 9) {
+        byte -= 10;
+        digit_0++;
+    }
+    
+    str[0] = digit_0;
+    str[1] = byte + '0';
+}
+
+//----------------------------------------------------------------------------------------
 // Interrupt handling
 //
 
@@ -34,13 +49,8 @@ extern "C" void MRT_IRQHandler(void) {
 //
 
 Timer::Timer() {
-    current_hours_      = 0;
-    current_minutes_    = 0;
-    current_seconds_    = 0;
-
-    start_hours_        = 0;
-    start_minutes_      = 0;
-    start_seconds_      = 0;
+    current_time_.all   = 0;
+    start_time_.all     = 0;
     
     x_ = 0;
     y_ = 0;
@@ -66,9 +76,9 @@ void Timer::SetCoords(uint8_t x, uint8_t y) {
 }
 
 void Timer::SetStartTime(uint8_t hours, uint8_t minutes, uint8_t seconds) {
-    start_hours_    = hours;
-    start_minutes_  = minutes;
-    start_seconds_  = seconds;
+    start_time_.hours    = hours;
+    start_time_.minutes  = minutes;
+    start_time_.seconds  = seconds;
 }
 
 void Timer::Start() {
@@ -80,29 +90,27 @@ void Timer::Stop() {
 }
 
 void Timer::Reset() {
-    current_hours_      = start_hours_;
-    current_minutes_    = start_minutes_;
-    current_seconds_    = start_seconds_;
+    current_time_.all   = start_time_.all;
     updated_            = true;
     state_              = STOPPED;
 }
 
 void Timer::Tick() {
     if (state_ == RUNNING) {
-        if (current_seconds_ > 0) {
-            current_seconds_--;
+        if (current_time_.seconds > 0) {
+            current_time_.seconds--;
         }
-        else if (current_minutes_ > 0) {
-            current_seconds_ = 59;
-            current_minutes_--;
+        else if (current_time_.minutes > 0) {
+            current_time_.seconds = 59;
+            current_time_.minutes--;
         }
-        else if (current_hours_ > 0) {
-            current_seconds_ = 59;
-            current_minutes_ = 59;
-            current_hours_--;
+        else if (current_time_.hours > 0) {
+            current_time_.seconds = 59;
+            current_time_.minutes = 59;
+            current_time_.hours--;
         }
         
-        if (current_seconds_ == current_minutes_ == current_hours_ == 0) {
+        if (current_time_.all == 0) {
             state_ = ALARM;
         }
         
@@ -114,13 +122,11 @@ void Timer::Update() {
     if (updated_) {
         char time_text[8];
         
-        time_text[0] = current_hours_ + '0';
+        time_text[0] = current_time_.hours + '0';
         time_text[1] = ':';
-        time_text[2] = (current_minutes_ / 10) + '0';
-        time_text[3] = (current_minutes_ % 10) + '0';
+        Time2DigitsToAscii(current_time_.minutes, time_text + 2);
         time_text[4] = ':';
-        time_text[5] = (current_seconds_ / 10) + '0';
-        time_text[6] = (current_seconds_ % 10) + '0';
+        Time2DigitsToAscii(current_time_.seconds, time_text + 5);
         time_text[7] = '\0';
         
         lcdMoveTo(x_, y_);

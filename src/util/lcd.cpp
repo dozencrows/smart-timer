@@ -152,7 +152,7 @@ static const uint8_t backpack_lut[] = {
     1 << PIN_D7 | 1 << PIN_D6 | 1 << PIN_D5 | 1 << PIN_D4,
 };
 
-static void lcdWriteNybble(uint8_t value, uint8_t mode) {
+void lcdWriteNybble(uint8_t value, uint8_t mode) {
     uint8_t backpack_value = backpack_lut[value & 0xf];
     
     if ( mode == WRITE_MODE_DATA )
@@ -166,7 +166,7 @@ static void lcdWriteNybble(uint8_t value, uint8_t mode) {
     i2cWrite(I2C_ADDR, backpack_value & ~__EN);   
 }
 
-static void lcdWriteByte(uint8_t value, uint8_t mode) {
+void lcdWriteByte(uint8_t value, uint8_t mode) {
     lcdWriteNybble(value >> 4, mode);
     lcdWriteNybble(value & 0x0f, mode);
 }

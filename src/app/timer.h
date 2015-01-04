@@ -31,13 +31,18 @@ class Timer {
     private:
         void Tick();
         
-        uint8_t current_hours_;
-        uint8_t current_minutes_;
-        uint8_t current_seconds_;
-
-        uint8_t start_hours_;
-        uint8_t start_minutes_;
-        uint8_t start_seconds_;
+        union TimeVal {
+            struct {
+                uint8_t hours;
+                uint8_t minutes;
+                uint8_t seconds;
+                uint8_t pad;
+            };
+            uint32_t all;
+        };
+        
+        TimeVal current_time_;
+        TimeVal start_time_;
         
         uint8_t x_;
         uint8_t y_;

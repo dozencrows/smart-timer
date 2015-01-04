@@ -50,7 +50,7 @@ void errorWithCode(const char* msg, int code) {
     printf("\n**ERROR: %s (%d)\n", msg, code);
 }
 
-void i2cSetup () {
+static void i2cSetup () {
     LPC_SWM->PINENABLE0 |= 3<<2;            // disable SWCLK and SWDIO
     LPC_SWM->PINASSIGN7 = 0x02FFFFFF;       // SDA on P2, pin 4
     LPC_SWM->PINASSIGN8 = 0xFFFFFF03;       // SCL on P3, pin 3
@@ -67,7 +67,7 @@ void i2cSetup () {
         error("i2c_set_timeout");
 }
 
-uint8_t i2cReadRegister (uint8_t addr, uint8_t reg) {
+static uint8_t i2cReadRegister (uint8_t addr, uint8_t reg) {
     uint8_t buf [4];
 
     I2C_PARAM_T param;
@@ -87,7 +87,7 @@ uint8_t i2cReadRegister (uint8_t addr, uint8_t reg) {
     return buf[1];
 }
 
-void i2cWriteRegister(uint8_t addr, uint8_t reg, uint8_t val) {
+static void i2cWriteRegister(uint8_t addr, uint8_t reg, uint8_t val) {
     uint8_t buf [4];
     
     I2C_PARAM_T param;
