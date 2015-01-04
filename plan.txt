@@ -1,0 +1,25 @@
+Smart Kitchen Timer Plan
+========================
+
+To Do
+-----
+* Leave backlight on for 2 seconds on boot
+* Fix 'first second' inaccuracy
+* Try larger characters
+* Try interrupt driven button polling
+* Investigate reducing power consumption further
+  * Ensure clocks turned off to everything not needed
+  * Try watchdog timer clock
+* Eliminate divide calls
+* Create release build (no printf)
+* Try battery power supply options:
+  * 4 x AA
+  * Add 5V regulator
+  * Other battery sizes
+* Switch MCP23017 with MCP23008
+* Try level conversion breakout
+* Try other piezo sounders to get better volume
+* Custom PCB
+* Case and button covers
+
+
