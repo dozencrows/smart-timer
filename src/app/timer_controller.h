@@ -8,6 +8,7 @@
 #include "timer.h"
 
 class Buzzer;
+class Backlight;
 
 class TimerController {
     public:
@@ -16,7 +17,7 @@ class TimerController {
             ALARM_STOP
         };
         
-        TimerController(Buzzer& buzzer);
+        TimerController(Buzzer& buzzer, Backlight& backlight);
         
         void Update();
         void ProcessButtons(uint8_t button_state);
@@ -26,10 +27,11 @@ class TimerController {
     
         void ProcessTimerButtons(uint8_t button_state, uint8_t buttons_changed, Timer& timer);
         
-        Buzzer& buzzer_;
-        Timer   timer1_;
-        Timer   timer2_;
-        uint8_t last_buttons;
+        Buzzer&     buzzer_;
+        Backlight&  backlight_;
+        Timer       timer1_;
+        Timer       timer2_;
+        uint8_t     last_buttons;
 };
 
 #endif // #if !defined(__TIMERCONTROLLER_H__)

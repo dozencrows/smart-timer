@@ -7,6 +7,7 @@
 #include "stdio.h"
 #include "LPC8xx.h"
 #include "util/lcd.h"
+#include "util/mrt_interrupt.h"
 #include "timer_controller.h"
 
 #define MAX_TIMER_INSTANCES     2
@@ -44,11 +45,6 @@ void TimerInterruptHandler(void) {
     }
 }
 
-extern "C" void MRT_IRQHandler(void) {
-    LPC_MRT->Channel[MRT_TIMER].STAT = 0x1 ; /* clr interupt request */
-    TimerInterruptHandler();
-}
-
 //----------------------------------------------------------------------------------------
 // Class implementation
 //
@@ -73,7 +69,7 @@ void Timer::Initialise() {
     // Set up a repeating 1 second timer interrupt on MRT channel 0
     LPC_MRT->Channel[MRT_TIMER].CTRL    = 0x01;
     LPC_MRT->Channel[MRT_TIMER].INTVAL  = SystemCoreClock | (1 << 31);
-    NVIC_EnableIRQ(MRT_IRQn);
+    mrt_interrupt_set_timer_callback(MRT_TIMER, TimerInterruptHandler);
 }
 
 void Timer::SetCoords(uint8_t x, uint8_t y) {

@@ -9,12 +9,13 @@
 
 #include "util/timers.h"
 #include "util/lcd.h"
+#include "util/mrt_interrupt.h"
 
 #include "timer_controller.h"
 #include "buzzer.h"
+#include "backlight.h"
 
 #define LOOP_STEP_MS        64
-#define BACKLIGHT_ON_MS     2000
 #define BUZZER_GPIO         5
 
 #define MCP23017_I2C_ADDR   0x20
@@ -103,18 +104,16 @@ static void i2cWriteRegister(uint8_t addr, uint8_t reg, uint8_t val) {
 }
 
 int main () { 
+    timersInit();
     serial.init(LPC_USART0, 115200);
+    delayMs(100);
+    i2cSetup();
     
     LPC_SWM->PINENABLE0 |= 1<<6;            // disable RESET to allow GPIO_5
     
-    timersInit();
-    
     Buzzer::Initialise();
     Timer::Initialise();
-
-    delayMs(100);
-
-    i2cSetup();
+    Backlight::Initialise();
 
     i2cWriteRegister(MCP23017_I2C_ADDR, MCP23017_IODIRB, 0xff);  // 0-7: input
     i2cWriteRegister(MCP23017_I2C_ADDR, MCP23017_GPPUB, 0xff);   // 0-7: pull-up
@@ -122,40 +121,15 @@ int main () {
 
     lcdInit();
     
-    uint8_t     last_buttons = 0;
-    uint32_t    backlight_counter = 0;
-    uint8_t     backlight_state = 0;
-    
+    Backlight backlight;
     Buzzer buzzer(BUZZER_GPIO);
-    TimerController timer_controller(buzzer);
+    TimerController timer_controller(buzzer, backlight);
+    
+    mrt_interrupt_control(true);
     
     while (true) {
-        timer_controller.Update();
-        
         uint8_t buttons = i2cReadRegister(MCP23017_I2C_ADDR, MCP23017_GPIOB);
-        
-        if (buttons != last_buttons) {
-            last_buttons = buttons;
-
-            if (!backlight_state) {
-                lcdSetBacklight(1);
-                backlight_state = 1;
-            }
-            backlight_counter = BACKLIGHT_ON_MS;
-            
-            timer_controller.ProcessButtons(buttons);
-        }
-        
-        if (backlight_counter <= LOOP_STEP_MS) {
-            if (backlight_state) {
-                lcdSetBacklight(0);
-                backlight_state = 0;
-            }
-        }
-        else if (last_buttons == 0) {
-            backlight_counter -= LOOP_STEP_MS;
-        }
-        
+        timer_controller.ProcessButtons(buttons);
         timer_controller.Update();
         delayMs(LOOP_STEP_MS);
     }
