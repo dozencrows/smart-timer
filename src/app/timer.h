@@ -13,7 +13,6 @@ class Timer {
         enum State {
             STOPPED = 0,
             RUNNING,
-            PAUSED,
             ALARM
         };
     
@@ -22,13 +21,16 @@ class Timer {
         static void Initialise();
         
         void SetCoords(uint8_t x, uint8_t y);
-        void SetStartTime(uint8_t hours, uint8_t minutes, uint8_t seconds);
-        void Start();
-        void Stop();
+        void ToggleStartStop();
+        void Clear();
         void Reset();
         void Update();
-    
+        void AddHour();
+        void AddMinute();
+        void AddSecond();
+
     private:
+        void AddTime(uint8_t hours, uint8_t minutes, uint8_t seconds);
         void Tick();
         
         union TimeVal {

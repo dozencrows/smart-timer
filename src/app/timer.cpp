@@ -11,6 +11,9 @@
 #define MAX_TIMER_INSTANCES     2
 #define MRT_TIMER               1
 #define TIME_TEXT_BUFFER_LEN    8
+#define MAX_HOURS               9
+#define MAX_MINUTES             59
+#define MAX_SECONDS             59
 
 //----------------------------------------------------------------------------------------
 // Utilities
@@ -77,21 +80,23 @@ void Timer::SetCoords(uint8_t x, uint8_t y) {
     y_ = y;
 }
 
-void Timer::SetStartTime(uint8_t hours, uint8_t minutes, uint8_t seconds) {
-    start_time_.hours    = hours;
-    start_time_.minutes  = minutes;
-    start_time_.seconds  = seconds;
-}
-
-void Timer::Start() {
-    if (current_time_.all > 0) {
-        state_ = RUNNING;
+void Timer::ToggleStartStop() {
+    if (state_ == ALARM) {
+        Reset();
+    }
+    else if (state_ != RUNNING) {
+        if (current_time_.all > 0) {
+            state_ = RUNNING;
+        }
+    }
+    else {
+        state_ = STOPPED;
     }
 }
 
-void Timer::Stop() {
-    visible_            = true;
-    state_ = PAUSED;
+void Timer::Clear() {
+    start_time_.all = 0;
+    Reset();
 }
 
 void Timer::Reset() {
@@ -99,6 +104,46 @@ void Timer::Reset() {
     updated_            = true;
     state_              = STOPPED;
     visible_            = true;
+}
+
+void Timer::AddHour() {
+    AddTime(1, 0, 0);
+}
+
+void Timer::AddMinute() {
+    AddTime(0, 1, 0);
+}
+
+void Timer::AddSecond() {
+    AddTime(0, 0, 1);
+}
+
+void Timer::AddTime(uint8_t hours, uint8_t minutes, uint8_t seconds) {
+    if (state_ == RUNNING) {
+        state_ = STOPPED;
+    }
+    else if (state_ == ALARM) {
+        Reset();
+        state_ = STOPPED;
+    }
+    else {
+        current_time_.hours += hours;
+        current_time_.minutes += minutes;
+        current_time_.seconds += seconds;
+        
+        while (current_time_.hours > MAX_HOURS) {
+            current_time_.hours -= MAX_HOURS + 1;
+        }
+        while (current_time_.minutes > MAX_MINUTES) {
+            current_time_.minutes -= MAX_MINUTES + 1;
+        }
+        while (current_time_.seconds > MAX_SECONDS) {
+            current_time_.seconds -= MAX_SECONDS + 1;
+        }
+        
+        start_time_.all = current_time_.all;
+        updated_ = true;
+    }
 }
 
 void Timer::Tick() {

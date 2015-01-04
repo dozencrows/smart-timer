@@ -10,7 +10,7 @@
 #include "util/timers.h"
 #include "util/lcd.h"
 
-#include "timer.h"
+#include "timer_controller.h"
 
 #define INT_RATE            4000
 #define LOOP_STEP_MS        64
@@ -137,22 +137,13 @@ int main () {
     uint32_t    backlight_counter = 0;
     uint8_t     backlight_state = 0;
     
-    Timer::Initialise();
-    Timer timer1, timer2;
+    TimerController timer_controller;
     
-    timer1.SetCoords(0, 0);
-    timer1.SetStartTime(0, 0, 10);
-    timer1.Reset();
-    timer1.Start();
-
-    timer2.SetCoords(9, 0);
-    timer2.SetStartTime(0, 1, 00);
-    timer2.Reset();
-    timer2.Start();
+    Timer::Initialise();
+    timer_controller.Initialise();
     
     while (true) {
-        timer1.Update();
-        timer2.Update();
+        timer_controller.Update();
         
         if ((loop_counter & 3) == 0) {
             led_state ^= 0x80;
@@ -164,22 +155,13 @@ int main () {
         if (buttons != last_buttons) {
             last_buttons = buttons;
 
-            char msg[32];
-            strcpy(msg, "Buttons:0x");
-            msg[10] = hexdigit[(buttons & 0xf0) >> 4];
-            msg[11] = hexdigit[buttons & 0x0f];
-            msg[12] = 0;
-
-            lcdMoveTo(2, 1);
-            lcdPuts(msg);
-            
             if (!backlight_state) {
                 lcdSetBacklight(1);
                 backlight_state = 1;
             }
             backlight_counter = BACKLIGHT_ON_MS;
             
-            buzzerFlag = last_buttons != 0;
+            timer_controller.ProcessButtons(buttons);
         }
         
         if (backlight_counter <= LOOP_STEP_MS) {
@@ -188,10 +170,11 @@ int main () {
                 backlight_state = 0;
             }
         }
-        else {
+        else if (last_buttons == 0) {
             backlight_counter -= LOOP_STEP_MS;
         }
         
+        timer_controller.Update();
         delayMs(LOOP_STEP_MS);
         loop_counter++;
     }
