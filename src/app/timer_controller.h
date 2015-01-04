@@ -7,18 +7,26 @@
 
 #include "timer.h"
 
+class Buzzer;
+
 class TimerController {
     public:
-        TimerController();
+        enum Notification {
+            ALARM_START,
+            ALARM_STOP
+        };
         
-        void Initialise();
+        TimerController(Buzzer& buzzer);
+        
         void Update();
         void ProcessButtons(uint8_t button_state);
+        void Notify(Timer& timer, Notification notification);
         
     private:
     
         void ProcessTimerButtons(uint8_t button_state, uint8_t buttons_changed, Timer& timer);
-    
+        
+        Buzzer& buzzer_;
         Timer   timer1_;
         Timer   timer2_;
         uint8_t last_buttons;

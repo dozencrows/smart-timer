@@ -7,6 +7,7 @@
 #include "stdio.h"
 #include "LPC8xx.h"
 #include "util/lcd.h"
+#include "timer_controller.h"
 
 #define MAX_TIMER_INSTANCES     2
 #define MRT_TIMER               1
@@ -52,7 +53,7 @@ extern "C" void MRT_IRQHandler(void) {
 // Class implementation
 //
 
-Timer::Timer() {
+Timer::Timer(TimerController& controller) : controller_(controller) {
     current_time_.all   = 0;
     start_time_.all     = 0;
     
@@ -100,6 +101,10 @@ void Timer::Clear() {
 }
 
 void Timer::Reset() {
+    if (state_ == ALARM) {
+        controller_.Notify(*this, TimerController::ALARM_STOP);
+    }
+    
     current_time_.all   = start_time_.all;
     updated_            = true;
     state_              = STOPPED;
@@ -124,7 +129,6 @@ void Timer::AddTime(uint8_t hours, uint8_t minutes, uint8_t seconds) {
     }
     else if (state_ == ALARM) {
         Reset();
-        state_ = STOPPED;
     }
     else {
         current_time_.hours += hours;
@@ -163,6 +167,7 @@ void Timer::Tick() {
         
         if (current_time_.all == 0) {
             state_ = ALARM;
+            controller_.Notify(*this, TimerController::ALARM_START);
         }
         
         updated_ = true;

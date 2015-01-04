@@ -7,6 +7,8 @@
 
 #include "lpc_types.h"
 
+class TimerController;
+
 class Timer {
     public:
     
@@ -16,7 +18,7 @@ class Timer {
             ALARM
         };
     
-        Timer();
+        Timer(TimerController& controller);
         
         static void Initialise();
         
@@ -43,6 +45,7 @@ class Timer {
             uint32_t all;
         };
         
+        TimerController& controller_;
         TimeVal current_time_;
         TimeVal start_time_;
         

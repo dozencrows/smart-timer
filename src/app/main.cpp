@@ -11,10 +11,11 @@
 #include "util/lcd.h"
 
 #include "timer_controller.h"
+#include "buzzer.h"
 
-#define INT_RATE            4000
 #define LOOP_STEP_MS        64
 #define BACKLIGHT_ON_MS     2000
+#define BUZZER_GPIO         5
 
 #define MCP23017_I2C_ADDR   0x20
 
@@ -34,13 +35,6 @@ const char hexdigit[] = "0123456789abcdef";
 
 uint32_t i2cBuffer [24];
 I2C_HANDLE_T* ih;
-uint8_t buzzerFlag = 0;
-uint8_t buzzerState = 0;
-
-extern "C" void SysTick_Handler () {                                             
-    buzzerState ^= 1;
-    LPC_GPIO_PORT->B0[5] = buzzerState & buzzerFlag;
-}
 
 void error(const char* msg) {
     printf("\n**ERROR: %s\n", msg);
@@ -112,43 +106,31 @@ int main () {
     serial.init(LPC_USART0, 115200);
     
     LPC_SWM->PINENABLE0 |= 1<<6;            // disable RESET to allow GPIO_5
-    LPC_GPIO_PORT->DIR0 |= 1<<5;            // GPIO_5 as output
     
     timersInit();
     
-    SysTick_Config(SystemCoreClock/INT_RATE);
+    Buzzer::Initialise();
+    Timer::Initialise();
 
     delayMs(100);
-    printf("\n[master]\n");
 
     i2cSetup();
 
-    i2cWriteRegister(MCP23017_I2C_ADDR, MCP23017_IODIRA, 0x00);  // 0-8: output
-    
     i2cWriteRegister(MCP23017_I2C_ADDR, MCP23017_IODIRB, 0xff);  // 0-7: input
     i2cWriteRegister(MCP23017_I2C_ADDR, MCP23017_GPPUB, 0xff);   // 0-7: pull-up
     i2cWriteRegister(MCP23017_I2C_ADDR, MCP23017_IPOLB, 0xff);   // 0-7: invert
 
     lcdInit();
     
-    uint8_t     led_state = 0x00;
-    uint32_t    loop_counter = 0;
     uint8_t     last_buttons = 0;
     uint32_t    backlight_counter = 0;
     uint8_t     backlight_state = 0;
     
-    TimerController timer_controller;
-    
-    Timer::Initialise();
-    timer_controller.Initialise();
+    Buzzer buzzer(BUZZER_GPIO);
+    TimerController timer_controller(buzzer);
     
     while (true) {
         timer_controller.Update();
-        
-        if ((loop_counter & 3) == 0) {
-            led_state ^= 0x80;
-            i2cWriteRegister(MCP23017_I2C_ADDR, MCP23017_GPIOA, led_state);
-        }
         
         uint8_t buttons = i2cReadRegister(MCP23017_I2C_ADDR, MCP23017_GPIOB);
         
@@ -176,7 +158,6 @@ int main () {
         
         timer_controller.Update();
         delayMs(LOOP_STEP_MS);
-        loop_counter++;
     }
 }
 

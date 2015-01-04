@@ -4,16 +4,15 @@
  
 #include "timer_controller.h"
 
+#include "buzzer.h"
+
 #define BUTTON_H        0x08
 #define BUTTON_M        0x04
 #define BUTTON_S        0x02
 #define BUTTON_START    0x01
 
-TimerController::TimerController() {
+TimerController::TimerController(Buzzer& buzzer) : buzzer_(buzzer), timer1_(*this), timer2_(*this){
     last_buttons = 0;
-}
-
-void TimerController::Initialise() {
     timer1_.SetCoords(0, 0);
     timer1_.Reset();
     timer2_.SetCoords(9, 0);
@@ -38,6 +37,7 @@ void TimerController::ProcessTimerButtons(uint8_t button_state, uint8_t buttons_
     uint8_t buttons_pressed = button_state & buttons_changed;
     
     if (buttons_pressed) {
+        buzzer_.Beep();
         if (buttons_pressed & BUTTON_START) {
             timer.ToggleStartStop();
         }
@@ -60,6 +60,17 @@ void TimerController::ProcessTimerButtons(uint8_t button_state, uint8_t buttons_
                 }
             }
         }
+    }
+}
+
+void TimerController::Notify(Timer& timer, Notification notification) {
+    switch(notification) {
+        case ALARM_START:
+            buzzer_.Beeps();
+            break;
+        case ALARM_STOP:
+            buzzer_.Off();
+            break;
     }
 }
 
