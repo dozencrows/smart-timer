@@ -1,7 +1,6 @@
 /* Timers module - various useful timers for LPC8xx using Multi-Rate timer */
 
 #include "LPC8xx.h"
-#include "stdio.h"
 
 void timersInit() {
     LPC_SYSCON->SYSAHBCLKCTRL |= (1<<10);    // enable MRT clock

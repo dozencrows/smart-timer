@@ -10,6 +10,8 @@
 #include "util/timers.h"
 #include "util/lcd.h"
 
+#include "timer.h"
+
 #define INT_RATE            4000
 #define LOOP_STEP_MS        64
 #define BACKLIGHT_ON_MS     2000
@@ -135,7 +137,23 @@ int main () {
     uint32_t    backlight_counter = 0;
     uint8_t     backlight_state = 0;
     
+    Timer::Initialise();
+    Timer timer1, timer2;
+    
+    timer1.SetCoords(0, 0);
+    timer1.SetStartTime(0, 0, 10);
+    timer1.Reset();
+    timer1.Start();
+
+    timer2.SetCoords(9, 0);
+    timer2.SetStartTime(0, 1, 00);
+    timer2.Reset();
+    timer2.Start();
+    
     while (true) {
+        timer1.Update();
+        timer2.Update();
+        
         if ((loop_counter & 3) == 0) {
             led_state ^= 0x80;
             i2cWriteRegister(MCP23017_I2C_ADDR, MCP23017_GPIOA, led_state);
