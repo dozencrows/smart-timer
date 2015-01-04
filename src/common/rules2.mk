@@ -13,13 +13,15 @@ CXX = $(TRGT)g++
 CP = $(TRGT)objcopy
 
 # compiler and linker settings
-CFLAGS = -mcpu=cortex-m0plus -mthumb -I../common -Os -ggdb
+CFLAGS = -mcpu=cortex-m0plus -mthumb -I../common -I.. -Os -ggdb
 CXXFLAGS = $(CFLAGS) -fno-rtti -fno-exceptions
 LDFLAGS = -Wl,--script=../common/LPC810.ld -nostartfiles -Wl,-Map=firmware.map
 
 # permit including this makefile from a sibling directory
 vpath %.c ../common
 vpath %.cpp ../common
+vpath %.c ../util
+vpath %.cpp ../util
 
 # default target
 #upload: firmware.bin

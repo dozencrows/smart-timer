@@ -7,8 +7,8 @@
 #include "lpc_types.h"
 #include "romapi_8xx.h"
 
-#include "timers.h"
-#include "lcd.h"
+#include "util/timers.h"
+#include "util/lcd.h"
 
 #define INT_RATE            4000
 #define LOOP_STEP_MS        64
