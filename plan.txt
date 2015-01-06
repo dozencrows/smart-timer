@@ -3,13 +3,13 @@ Smart Kitchen Timer Plan
 
 To Do
 -----
-* Leave backlight on for 2 seconds on boot
-* Fix 'first second' inaccuracy
-* Try larger characters
+* Try 'unity' build to see any effect on size
 * Try interrupt driven button polling
 * Investigate reducing power consumption further
   * Ensure clocks turned off to everything not needed
-  * Try watchdog timer clock
+  * Try sleep/power down mode after idle timeout; wake-up on button press interrupt
+* Fix 'first second' inaccuracy
+* Try larger characters
 * Eliminate divide calls
 * Create release build (no printf)
 * Try battery power supply options:
@@ -22,4 +22,7 @@ To Do
 * Custom PCB
 * Case and button covers
 
+Done
+----
+* Leave backlight on for 2 seconds on boot
 
