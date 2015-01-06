@@ -7,6 +7,8 @@
 
 #include "timer.h"
 
+#define BACKLIGHT_ON_TIME_MS   2000
+
 class Buzzer;
 class Backlight;
 

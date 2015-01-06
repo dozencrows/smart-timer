@@ -120,7 +120,7 @@ static void i2cWrite(uint8_t addr, uint8_t value) {
 
 #define LCD_CLEAR_TIME_US       2000
 
-static uint8_t backlight_state = 0;
+static uint8_t backlight_state = __BL;
 
 void lcdSetBacklight(int value) {
     if (value) {
@@ -172,8 +172,8 @@ void lcdWriteByte(uint8_t value, uint8_t mode) {
 }
 
 void lcdInit() {
-    // Bring all pins to 0 via I2C
-    i2cWrite(I2C_ADDR, 0);
+    // Bring all pins to 0 via I2C apart from backlight (defaults to on)
+    i2cWrite(I2C_ADDR, backlight_state);
         
     // Ensure we meet minimum 40ms wait between power crossing 2.7V and
     // sending of first command

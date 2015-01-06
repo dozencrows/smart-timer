@@ -32,7 +32,7 @@ void TimerController::ProcessButtons(uint8_t button_state) {
     ProcessTimerButtons(button_state & 0xf, buttons_changed & 0xf, timer2_);
     
     if (buttons_changed && (button_state == 0)) {
-        backlight_.DelayedOff(2000);
+        backlight_.DelayedOff(BACKLIGHT_ON_TIME_MS);
     }
     
     last_buttons = button_state;
