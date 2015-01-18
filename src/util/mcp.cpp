@@ -1,9 +1,9 @@
 /*
- * Implementation of MCP23017 GPIO expander interfacing
+ * Implementation of MCP23008 and MCP23017 GPIO expander interfacing
  */
  
 #include "stdio.h"
-#include "mcp23017.h"
+#include "mcp.h"
 #include "romapi_8xx.h"
 
 extern void error(const char*);

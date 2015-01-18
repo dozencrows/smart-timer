@@ -1,6 +1,6 @@
-/* MCP23017 GPIO Extender Module */
-#if !defined(__MCP23017_H__)
-#define __MCP23017_H__
+/* MCP23008 & MCP23017 GPIO Extender Module */
+#if !defined(__MCP_H__)
+#define __MCP_H__
 
 #include "lpc_types.h"
 
@@ -22,5 +22,5 @@ extern uint8_t mcpReadRegister (uint8_t addr, uint8_t reg);
 extern void mcpWriteRegister(uint8_t addr, uint8_t reg, uint8_t val);
 
 
-#endif // #if !defined(__MCP23017_H__)
+#endif // #if !defined(__MCP_H__)
 

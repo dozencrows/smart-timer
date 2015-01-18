@@ -10,7 +10,7 @@
 #include "util/timers.h"
 #include "util/lcd.h"
 #include "util/mrt_interrupt.h"
-#include "util/mcp23017.h"
+#include "util/mcp.h"
 
 #include "timer_controller.h"
 #include "buzzer.h"
