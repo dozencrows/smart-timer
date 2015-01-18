@@ -61,18 +61,21 @@ int main () {
     i2cSetup();
     
     LPC_SWM->PINENABLE0 |= 1<<6;            // disable RESET to allow GPIO_5
+
+    // Set up PIO0_1 (pin 5) for GPIO input. 
+    // On reset:
+    // * its PINENABLE0 bit is 1 so no special function is active - no change needed
+    // * GPIO means no movable function should be assigned to this pin - no change needed
+    // * Input GPIO means 0 in bit for direction register - no change needed
     
     Buzzer::Initialise();
     Timer::Initialise();
     Backlight::Initialise();
 
-    //mcpWriteRegister(MCP_I2C_ADDR, MCP23017_IODIRB, 0xff);  // 0-7: input
-    //mcpWriteRegister(MCP_I2C_ADDR, MCP23017_GPPUB, 0xff);   // 0-7: pull-up
-    //mcpWriteRegister(MCP_I2C_ADDR, MCP23017_IPOLB, 0xff);   // 0-7: invert
-
-    mcpWriteRegister(MCP_I2C_ADDR, MCP23008_IODIR, 0xff);  // 0-7: input
-    mcpWriteRegister(MCP_I2C_ADDR, MCP23008_GPPU, 0xff);   // 0-7: pull-up
-    mcpWriteRegister(MCP_I2C_ADDR, MCP23008_IPOL, 0xff);   // 0-7: invert
+    mcpWriteRegister(MCP_I2C_ADDR, MCP23008_IODIR, 0xff);   // 0-7: input
+    mcpWriteRegister(MCP_I2C_ADDR, MCP23008_GPPU, 0xff);    // 0-7: pull-up
+    mcpWriteRegister(MCP_I2C_ADDR, MCP23008_IPOL, 0xff);    // 0-7: invert
+    mcpWriteRegister(MCP_I2C_ADDR, MCP23008_GPINTEN, 0xff); // 0-7: interrupt on change. Interrupt pin is active low
 
     lcdInit();
     
@@ -84,9 +87,11 @@ int main () {
     backlight.DelayedOff(BACKLIGHT_ON_TIME_MS);
     
     while (true) {
-        //uint8_t buttons = mcpReadRegister(MCP_I2C_ADDR, MCP23017_GPIOB);
-        uint8_t buttons = mcpReadRegister(MCP_I2C_ADDR, MCP23008_GPIO);
-        timer_controller.ProcessButtons(buttons);
+        if (LPC_GPIO_PORT->B0[1] == 0) {
+            uint8_t buttons = mcpReadRegister(MCP_I2C_ADDR, MCP23008_GPIO);
+            timer_controller.ProcessButtons(buttons);
+        }
+        
         timer_controller.Update();
         delayMs(LOOP_STEP_MS);
     }
