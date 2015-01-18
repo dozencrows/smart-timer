@@ -10,7 +10,7 @@ extern void error(const char*);
 
 extern I2C_HANDLE_T* ih;
 
-uint8_t mcp23017ReadRegister (uint8_t addr, uint8_t reg) {
+uint8_t mcpReadRegister (uint8_t addr, uint8_t reg) {
     uint8_t buf [4];
 
     I2C_PARAM_T param;
@@ -30,7 +30,7 @@ uint8_t mcp23017ReadRegister (uint8_t addr, uint8_t reg) {
     return buf[1];
 }
 
-void mcp23017WriteRegister(uint8_t addr, uint8_t reg, uint8_t val) {
+void mcpWriteRegister(uint8_t addr, uint8_t reg, uint8_t val) {
     uint8_t buf [4];
     
     I2C_PARAM_T param;

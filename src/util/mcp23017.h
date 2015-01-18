@@ -13,8 +13,13 @@
 #define MCP23017_GPPUA      0x0c
 #define MCP23017_GPPUB      0x0d
 
-extern uint8_t mcp23017ReadRegister (uint8_t addr, uint8_t reg);
-extern void mcp23017WriteRegister(uint8_t addr, uint8_t reg, uint8_t val);
+#define MCP23008_IODIR      0x00
+#define MCP23008_IPOL       0x01
+#define MCP23008_GPPU       0x06
+#define MCP23008_GPIO       0x09
+
+extern uint8_t mcpReadRegister (uint8_t addr, uint8_t reg);
+extern void mcpWriteRegister(uint8_t addr, uint8_t reg, uint8_t val);
 
 
 #endif // #if !defined(__MCP23017_H__)

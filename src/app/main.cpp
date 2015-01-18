@@ -19,7 +19,7 @@
 #define LOOP_STEP_MS        64
 #define BUZZER_GPIO         5
 
-#define MCP23017_I2C_ADDR   0x20
+#define MCP_I2C_ADDR        0x20
 
 uint32_t SystemMainClock = 12000000;
 uint32_t SystemCoreClock = 12000000;
@@ -66,9 +66,13 @@ int main () {
     Timer::Initialise();
     Backlight::Initialise();
 
-    mcp23017WriteRegister(MCP23017_I2C_ADDR, MCP23017_IODIRB, 0xff);  // 0-7: input
-    mcp23017WriteRegister(MCP23017_I2C_ADDR, MCP23017_GPPUB, 0xff);   // 0-7: pull-up
-    mcp23017WriteRegister(MCP23017_I2C_ADDR, MCP23017_IPOLB, 0xff);   // 0-7: invert
+    //mcpWriteRegister(MCP_I2C_ADDR, MCP23017_IODIRB, 0xff);  // 0-7: input
+    //mcpWriteRegister(MCP_I2C_ADDR, MCP23017_GPPUB, 0xff);   // 0-7: pull-up
+    //mcpWriteRegister(MCP_I2C_ADDR, MCP23017_IPOLB, 0xff);   // 0-7: invert
+
+    mcpWriteRegister(MCP_I2C_ADDR, MCP23008_IODIR, 0xff);  // 0-7: input
+    mcpWriteRegister(MCP_I2C_ADDR, MCP23008_GPPU, 0xff);   // 0-7: pull-up
+    mcpWriteRegister(MCP_I2C_ADDR, MCP23008_IPOL, 0xff);   // 0-7: invert
 
     lcdInit();
     
@@ -80,7 +84,8 @@ int main () {
     backlight.DelayedOff(BACKLIGHT_ON_TIME_MS);
     
     while (true) {
-        uint8_t buttons = mcp23017ReadRegister(MCP23017_I2C_ADDR, MCP23017_GPIOB);
+        //uint8_t buttons = mcpReadRegister(MCP_I2C_ADDR, MCP23017_GPIOB);
+        uint8_t buttons = mcpReadRegister(MCP_I2C_ADDR, MCP23008_GPIO);
         timer_controller.ProcessButtons(buttons);
         timer_controller.Update();
         delayMs(LOOP_STEP_MS);
