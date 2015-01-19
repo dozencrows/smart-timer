@@ -3,9 +3,6 @@ Smart Kitchen Timer Plan
 
 To Do
 -----
-* Try interrupt driven button polling: LPC side
-  * Rejig main loop to be WFI based
-  * Enable & disable other interrupts (timer, buzzer) as needed
 * Try 'unity' build to see any effect on size
 * Investigate reducing power consumption further
   * Ensure clocks turned off to everything not needed
@@ -22,10 +19,18 @@ To Do
 * Custom PCB
 * Case and button covers
 
+WIP
+---
+* Try interrupt driven button polling: LPC side
+  * Enable & disable other interrupts (timer, buzzer) as needed
+  * Improve button responsiveness
+
 Done
 ----
 * Leave backlight on for 2 seconds on boot
 * Switch MCP23017 with MCP23008
 * Tested with 4 x AA and 5V regulator
 * Try interrupt driven button polling: GPIO extender side
+* Try interrupt driven button polling: LPC side
+  * Rejig main loop to be WFI based
 

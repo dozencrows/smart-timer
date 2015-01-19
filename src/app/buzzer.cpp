@@ -36,7 +36,7 @@ extern "C" void SysTick_Handler () {
 //
 
 void Buzzer::Initialise() {
-    SysTick_Config(SystemCoreClock/INT_RATE);
+    //SysTick_Config(SystemCoreClock/INT_RATE);
 }
 
 Buzzer::Buzzer(uint8_t gpio) : gpio_(gpio){

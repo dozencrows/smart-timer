@@ -54,6 +54,16 @@ static void i2cSetup () {
         error("i2c_set_timeout");
 }
 
+static bool buttonIRQ = false;
+
+extern "C" void PININT0_IRQHandler(void) {
+    NVIC_ClearPendingIRQ(PININT0_IRQn);
+    if (LPC_PIN_INT->FALL & 1) {
+        LPC_PIN_INT->FALL = 1;
+        buttonIRQ = true;
+    }
+}
+
 int main () { 
     timersInit();
     serial.init(LPC_USART0, 115200);
@@ -67,7 +77,7 @@ int main () {
     // * its PINENABLE0 bit is 1 so no special function is active - no change needed
     // * GPIO means no movable function should be assigned to this pin - no change needed
     // * Input GPIO means 0 in bit for direction register - no change needed
-    
+        
     Buzzer::Initialise();
     Timer::Initialise();
     Backlight::Initialise();
@@ -76,6 +86,13 @@ int main () {
     mcpWriteRegister(MCP_I2C_ADDR, MCP23008_GPPU, 0xff);    // 0-7: pull-up
     mcpWriteRegister(MCP_I2C_ADDR, MCP23008_IPOL, 0xff);    // 0-7: invert
     mcpWriteRegister(MCP_I2C_ADDR, MCP23008_GPINTEN, 0xff); // 0-7: interrupt on change. Interrupt pin is active low
+
+    // Configure pin interrupt for PIO0_1
+    LPC_SYSCON->PINTSEL[0]      = 1;        // Pin interrupt 0 from PIO0_1
+    LPC_PIN_INT->ISEL           = 0;        // Level sensitive (1 bit per pin interrupt)
+    LPC_PIN_INT->IENF           = 1;        // Falling level   (1 bit per pin interrupt)
+    LPC_SYSCON->SYSAHBCLKCTRL  |= 1<<6;   // Turn on clock to pin interrupts block (already 1 after reset)
+    NVIC_EnableIRQ(PININT0_IRQn);           // Enable pin interrupt in NVIC (#24)
 
     lcdInit();
     
@@ -87,13 +104,14 @@ int main () {
     backlight.DelayedOff(BACKLIGHT_ON_TIME_MS);
     
     while (true) {
-        if (LPC_GPIO_PORT->B0[1] == 0) {
+        if (buttonIRQ) {
+            buttonIRQ = false;
             uint8_t buttons = mcpReadRegister(MCP_I2C_ADDR, MCP23008_GPIO);
             timer_controller.ProcessButtons(buttons);
         }
         
         timer_controller.Update();
-        delayMs(LOOP_STEP_MS);
+        __WFI();
     }
 }
 
