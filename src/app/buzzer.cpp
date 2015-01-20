@@ -77,9 +77,11 @@ void Buzzer::Update() {
 void Buzzer::On() {
     flag_ = BUZZER_MASK;
     mode_ = CONTINUOUS;
+    SysTick_Config(SystemCoreClock/INT_RATE);
 }
 
 void Buzzer::Off() {
+    SysTick->CTRL = 0;
     flag_ = 0;
     mode_ = OFF;
 }
@@ -88,11 +90,13 @@ void Buzzer::Beep() {
     flag_   = BUZZER_MASK;
     delay_  = BEEP_DELAY;
     mode_   = BEEP;
+    SysTick_Config(SystemCoreClock/INT_RATE);
 }
 
 void Buzzer::Beeps() {
     flag_   = BUZZER_MASK;
     delay_  = BEEP_DELAY;
     mode_   = BEEPS;
+    SysTick_Config(SystemCoreClock/INT_RATE);
 }
 
