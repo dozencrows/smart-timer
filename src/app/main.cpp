@@ -54,13 +54,13 @@ static void i2cSetup () {
         error("i2c_set_timeout");
 }
 
-static bool buttonIRQ = false;
+static volatile int buttonIRQCount = 0;
 
 extern "C" void PININT0_IRQHandler(void) {
     NVIC_ClearPendingIRQ(PININT0_IRQn);
     if (LPC_PIN_INT->FALL & 1) {
         LPC_PIN_INT->FALL = 1;
-        buttonIRQ = true;
+        buttonIRQCount++;
     }
 }
 
@@ -104,14 +104,19 @@ int main () {
     backlight.DelayedOff(BACKLIGHT_ON_TIME_MS);
     
     while (true) {
-        if (buttonIRQ) {
-            buttonIRQ = false;
+        if (buttonIRQCount > 0) {
+            __disable_irq();
+            buttonIRQCount--;
+            __enable_irq();
             uint8_t buttons = mcpReadRegister(MCP_I2C_ADDR, MCP23008_GPIO);
             timer_controller.ProcessButtons(buttons);
         }
         
         timer_controller.Update();
-        __WFI();
+        
+        if (buttonIRQCount == 0) {
+            __WFI();
+        }
     }
 }
 
