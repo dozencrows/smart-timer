@@ -3,10 +3,9 @@ Smart Kitchen Timer Plan
 
 To Do
 -----
+* Refactor main module button handling to better encapsulate GPIO expanded & interrupt handling
 * Try 'unity' build to see any effect on size
 * Investigate reducing power consumption further
-  * Ensure clocks turned off to everything not needed
-  * Only turn on interrupts
   * Try sleep/power down mode after idle timeout; wake-up on button press interrupt
 * Fix 'first second' inaccuracy
 * Try larger characters
@@ -16,14 +15,14 @@ To Do
   * Other battery sizes
 * Try level conversion breakout
 * Try other piezo sounders to get better volume
+* Try piezo sounder with built-in oscillator to simplify code & see if power reduces
 * Custom PCB
 * Case and button covers
 
 WIP
 ---
 * Try interrupt driven button polling: LPC side
-  * Enable & disable other interrupts (timer, buzzer) as needed
-  * Improve button responsiveness
+  * Enable & disable timer interrupt as needed
 
 Done
 ----
@@ -33,4 +32,6 @@ Done
 * Try interrupt driven button polling: GPIO extender side
 * Try interrupt driven button polling: LPC side
   * Rejig main loop to be WFI based
+  * Enable & disable buzzer interrupt as needed
+  * Improve button responsiveness
 
