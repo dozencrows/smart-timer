@@ -13,7 +13,7 @@
 #define BUTTON_START    0x01
 
 TimerController::TimerController(Buzzer& buzzer, Backlight& backlight) : buzzer_(buzzer), backlight_(backlight), timer1_(*this), timer2_(*this){
-    last_buttons = 0;
+    last_buttons_ = 0;
     timer1_.SetCoords(0, 0);
     timer1_.Reset();
     timer2_.SetCoords(9, 0);
@@ -26,7 +26,7 @@ void TimerController::Update() {
 }
 
 void TimerController::ProcessButtons(uint8_t button_state) {
-    uint8_t buttons_changed = button_state ^ last_buttons;
+    uint8_t buttons_changed = button_state ^ last_buttons_;
     
     ProcessTimerButtons(button_state >> 4, buttons_changed >> 4, timer1_);
     ProcessTimerButtons(button_state & 0xf, buttons_changed & 0xf, timer2_);
@@ -35,7 +35,7 @@ void TimerController::ProcessButtons(uint8_t button_state) {
         backlight_.DelayedOff(BACKLIGHT_ON_TIME_MS);
     }
     
-    last_buttons = button_state;
+    last_buttons_ = button_state;
 }
 
 void TimerController::ProcessTimerButtons(uint8_t button_state, uint8_t buttons_changed, Timer& timer) {

@@ -11,7 +11,7 @@
 //----------------------------------------------------------------------------------------
 // Interrupt handling
 //
-#define MRT_TIMER   0
+#define BACKLIGHT_MRT_TIMER   0
 
 void BacklightInterruptHandler(void) {
     lcdSetBacklight(0);    
@@ -22,7 +22,7 @@ void BacklightInterruptHandler(void) {
 //
 
 void Backlight::Initialise() {
-    mrt_interrupt_set_timer_callback(MRT_TIMER, BacklightInterruptHandler);
+    mrt_interrupt_set_timer_callback(BACKLIGHT_MRT_TIMER, BacklightInterruptHandler);
 }
 
 Backlight::Backlight() {
@@ -33,7 +33,7 @@ void Backlight::On() {
 }
 
 void Backlight::DelayedOff(uint32_t delay_ms) {
-    LPC_MRT->Channel[MRT_TIMER].CTRL    = 0x03;
-    LPC_MRT->Channel[MRT_TIMER].INTVAL  = (SystemCoreClock / 1000) * delay_ms | (1 << 31);
+    LPC_MRT->Channel[BACKLIGHT_MRT_TIMER].CTRL    = 0x03;
+    LPC_MRT->Channel[BACKLIGHT_MRT_TIMER].INTVAL  = (SystemCoreClock / 1000) * delay_ms | (1 << 31);
 }
 

@@ -1,6 +1,3 @@
-// I2C master, reads out an attached RTC chip on I2C address 0x68.
-
-#include "stdio.h"
 #include "string.h"
 #include "serial.h"
 
@@ -10,16 +7,15 @@
 #include "util/timers.h"
 #include "util/lcd.h"
 #include "util/mrt_interrupt.h"
-#include "util/mcp.h"
 
 #include "timer_controller.h"
 #include "buzzer.h"
 #include "backlight.h"
+#include "button_input.h"
 
 #define LOOP_STEP_MS        64
 #define BUZZER_GPIO         5
-
-#define MCP_I2C_ADDR        0x20
+#define INPUT_I2C_ADDR      0x20
 
 uint32_t SystemMainClock = 12000000;
 uint32_t SystemCoreClock = 12000000;
@@ -30,11 +26,20 @@ uint32_t i2cBuffer [24];
 I2C_HANDLE_T* ih;
 
 void error(const char* msg) {
-    printf("\n**ERROR: %s\n", msg);
+    puts("\n**ERROR: ");
+    puts(msg);
+    putchar('\n');
 }
 
 void errorWithCode(const char* msg, int code) {
-    printf("\n**ERROR: %s (%d)\n", msg, code);
+    puts("\n**ERROR: ");
+    puts(msg);
+    putchar(' ');
+    
+    for (int i = 24; i >= 0; i-=4) {
+        putchar(hexdigit[(code >> i) & 0xf]);
+    }
+    putchar('\n');
 }
 
 static void i2cSetup () {
@@ -54,67 +59,38 @@ static void i2cSetup () {
         error("i2c_set_timeout");
 }
 
-static volatile int buttonIRQCount = 0;
-
-extern "C" void PININT0_IRQHandler(void) {
-    NVIC_ClearPendingIRQ(PININT0_IRQn);
-    if (LPC_PIN_INT->FALL & 1) {
-        LPC_PIN_INT->FALL = 1;
-        buttonIRQCount++;
-    }
-}
-
 int main () { 
     timersInit();
     serial.init(LPC_USART0, 115200);
     delayMs(100);
     i2cSetup();
     
-    LPC_SWM->PINENABLE0 |= 1<<6;            // disable RESET to allow GPIO_5
-
-    // Set up PIO0_1 (pin 5) for GPIO input. 
-    // On reset:
-    // * its PINENABLE0 bit is 1 so no special function is active - no change needed
-    // * GPIO means no movable function should be assigned to this pin - no change needed
-    // * Input GPIO means 0 in bit for direction register - no change needed
+    LPC_SWM->PINENABLE0 |= 1<<6;            // disable RESET to allow GPIO_5 (for buzzer)
         
     Buzzer::Initialise();
     Timer::Initialise();
     Backlight::Initialise();
-
-    mcpWriteRegister(MCP_I2C_ADDR, MCP23008_IODIR, 0xff);   // 0-7: input
-    mcpWriteRegister(MCP_I2C_ADDR, MCP23008_GPPU, 0xff);    // 0-7: pull-up
-    mcpWriteRegister(MCP_I2C_ADDR, MCP23008_IPOL, 0xff);    // 0-7: invert
-    mcpWriteRegister(MCP_I2C_ADDR, MCP23008_GPINTEN, 0xff); // 0-7: interrupt on change. Interrupt pin is active low
-
-    // Configure pin interrupt for PIO0_1
-    LPC_SYSCON->PINTSEL[0]      = 1;        // Pin interrupt 0 from PIO0_1
-    LPC_PIN_INT->ISEL           = 0;        // Level sensitive (1 bit per pin interrupt)
-    LPC_PIN_INT->IENF           = 1;        // Falling level   (1 bit per pin interrupt)
-    LPC_SYSCON->SYSAHBCLKCTRL  |= 1<<6;   // Turn on clock to pin interrupts block (already 1 after reset)
-    NVIC_EnableIRQ(PININT0_IRQn);           // Enable pin interrupt in NVIC (#24)
+    ButtonInput::Initialise();
 
     lcdInit();
     
     Backlight       backlight;
     Buzzer          buzzer(BUZZER_GPIO);
     TimerController timer_controller(buzzer, backlight);
+    ButtonInput     button_input(INPUT_I2C_ADDR);
     
     mrt_interrupt_control(true);
     backlight.DelayedOff(BACKLIGHT_ON_TIME_MS);
     
     while (true) {
-        if (buttonIRQCount > 0) {
-            __disable_irq();
-            buttonIRQCount--;
-            __enable_irq();
-            uint8_t buttons = mcpReadRegister(MCP_I2C_ADDR, MCP23008_GPIO);
+        while (button_input.HasButtonStateChanged()) {
+            uint8_t buttons = button_input.GetButtonStates();
             timer_controller.ProcessButtons(buttons);
         }
-        
+
         timer_controller.Update();
         
-        if (buttonIRQCount == 0) {
+        if (!button_input.HasButtonStateChanged()) {
             __WFI();
         }
     }

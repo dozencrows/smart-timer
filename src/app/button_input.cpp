@@ -13,7 +13,9 @@
 
 #include "LPC8xx.h"
 #include "util/mcp.h"
-#include "stdio.h"
+#include "util/timers.h"
+
+#define POST_READ_DELAY_MS  8
 
 static volatile int buttonIRQCount = 0;
 
@@ -47,6 +49,7 @@ uint8_t ButtonInput::GetButtonStates() {
         buttonIRQCount--;
         __enable_irq();
         button_state_ = mcpReadRegister(i2c_addr_, MCP23008_GPIO);
+        delayMs(POST_READ_DELAY_MS);     // short delay to try to avoid I2C errors
     }
     
     return button_state_;

@@ -33,7 +33,7 @@ class TimerController {
         Backlight&  backlight_;
         Timer       timer1_;
         Timer       timer2_;
-        uint8_t     last_buttons;
+        uint8_t     last_buttons_;
 };
 
 #endif // #if !defined(__TIMERCONTROLLER_H__)
