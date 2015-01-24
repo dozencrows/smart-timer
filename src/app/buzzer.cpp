@@ -12,6 +12,7 @@
 #define BUZZER_MASK             1
 #define BEEP_LENGTH_MS          125
 #define BEEP_DELAY              (INT_RATE / 1000) * BEEP_LENGTH_MS
+#define SYSTICK_COUNTER         (FIXED_CLOCK_RATE_HZ / INT_RATE)
 
 //----------------------------------------------------------------------------------------
 // Interrupt handling
@@ -77,7 +78,7 @@ void Buzzer::Update() {
 void Buzzer::On() {
     flag_ = BUZZER_MASK;
     mode_ = CONTINUOUS;
-    SysTick_Config(SystemCoreClock/INT_RATE);
+    SysTick_Config(SYSTICK_COUNTER);
 }
 
 void Buzzer::Off() {
@@ -90,13 +91,13 @@ void Buzzer::Beep() {
     flag_   = BUZZER_MASK;
     delay_  = BEEP_DELAY;
     mode_   = BEEP;
-    SysTick_Config(SystemCoreClock/INT_RATE);
+    SysTick_Config(SYSTICK_COUNTER);
 }
 
 void Buzzer::Beeps() {
     flag_   = BUZZER_MASK;
     delay_  = BEEP_DELAY;
     mode_   = BEEPS;
-    SysTick_Config(SystemCoreClock/INT_RATE);
+    SysTick_Config(SYSTICK_COUNTER);
 }
 

@@ -17,8 +17,8 @@
 #define BUZZER_GPIO         5
 #define INPUT_I2C_ADDR      0x20
 
-uint32_t SystemMainClock = 12000000;
-uint32_t SystemCoreClock = 12000000;
+uint32_t SystemMainClock = FIXED_CLOCK_RATE_HZ;
+uint32_t SystemCoreClock = FIXED_CLOCK_RATE_HZ;
 
 const char hexdigit[] = "0123456789abcdef";
 
@@ -61,8 +61,9 @@ static void i2cSetup () {
 
 int main () { 
     timersInit();
-    serial.init(LPC_USART0, 115200);
+    serial.init(LPC_USART0, FIXED_UART_BAUD_RATE);
     delayMs(100);
+    puts("Smart Timer");
     i2cSetup();
     
     LPC_SWM->PINENABLE0 |= 1<<6;            // disable RESET to allow GPIO_5 (for buzzer)

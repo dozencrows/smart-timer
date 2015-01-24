@@ -34,6 +34,6 @@ void Backlight::On() {
 
 void Backlight::DelayedOff(uint32_t delay_ms) {
     LPC_MRT->Channel[BACKLIGHT_MRT_TIMER].CTRL    = 0x03;
-    LPC_MRT->Channel[BACKLIGHT_MRT_TIMER].INTVAL  = (SystemCoreClock / 1000) * delay_ms | (1 << 31);
+    LPC_MRT->Channel[BACKLIGHT_MRT_TIMER].INTVAL  = (FIXED_CLOCK_RATE_HZ / 1000) * delay_ms | (1 << 31);
 }
 

@@ -13,14 +13,14 @@ void timersInit() {
 }
 
 void delayMs(int milliseconds) {
-    LPC_MRT->Channel[2].INTVAL = (((SystemCoreClock / 250L) * milliseconds) >> 2) - 286;
+    LPC_MRT->Channel[2].INTVAL = (((FIXED_CLOCK_RATE_HZ / 250L) * milliseconds) >> 2) - 286;
 
     while (LPC_MRT->Channel[2].STAT & 0x02)
         ; //wait while running
 }
 
 void delayUs(int microseconds) {
-    int clk = (SystemCoreClock / 1000000) * microseconds;
+    int clk = (FIXED_CLOCK_RATE_HZ / 1000000) * microseconds;
     
     if (clk > 3) {
         LPC_MRT->Channel[3].INTVAL = (clk-3);
