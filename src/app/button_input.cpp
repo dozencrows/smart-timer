@@ -20,7 +20,6 @@
 static volatile int buttonIRQCount = 0;
 
 extern "C" void PININT0_IRQHandler(void) {
-    NVIC_ClearPendingIRQ(PININT0_IRQn);
     if (LPC_PIN_INT->FALL & 1) {
         LPC_PIN_INT->FALL = 1;
         buttonIRQCount++;
@@ -49,7 +48,6 @@ uint8_t ButtonInput::GetButtonStates() {
         buttonIRQCount--;
         __enable_irq();
         button_state_ = mcpReadRegister(i2c_addr_, MCP23008_GPIO);
-        delayMs(POST_READ_DELAY_MS);     // short delay to try to avoid I2C errors
     }
     
     return button_state_;
