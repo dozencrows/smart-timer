@@ -13,11 +13,13 @@ Software:
 * Try custom characters
 
 Hardware:
+* Fix initial beep at start with continuous tone buzzer
+* Add temp resistor to control continuous tone buzzer volume for dev purposes
+* Try push/pull piezo driver with 
 * Try battery power supply options:
   * Other battery sizes
 * Try 2 channel level conversion breakout
 * Try other piezo sounders to get better volume
-* Try piezo sounder with built-in oscillator to simplify code & see if power reduces
 * Custom PCB
 * Case and button covers
 
@@ -39,4 +41,6 @@ Done
 * Removed printf to save memory
 * Refactor main module button handling to better encapsulate GPIO expanded & interrupt handling
 * Eliminate divide calls
-
+* Try piezo sounder with built-in oscillator to simplify code & see if power reduces
+  * Didn't observe power difference.
+  * Was able to cut down buzzer interrupt rate

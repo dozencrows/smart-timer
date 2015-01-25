@@ -6,12 +6,22 @@
 
 #include "LPC8xx.h"
 
-#define BUZZER_FREQ_HZ          2000
-#define INT_RATE                (BUZZER_FREQ_HZ * 2)
+#define BUZZER_CONTINUOUS_TONE
+
 #define MAX_BUZZER_INSTANCES    1
 #define BUZZER_MASK             1
 #define BEEP_LENGTH_MS          125
-#define BEEP_DELAY              (INT_RATE / 1000) * BEEP_LENGTH_MS
+
+#if defined(BUZZER_CONTINUOUS_TONE)
+#define INT_PERIOD_MS           25
+#define INT_RATE                (1000 / INT_PERIOD_MS)
+#define BEEP_DELAY              (BEEP_LENGTH_MS / INT_PERIOD_MS)
+#else
+#define BUZZER_FREQ_HZ          2000
+#define INT_RATE                (BUZZER_FREQ_HZ * 2)
+#define BEEP_DELAY              ((INT_RATE / 1000) * BEEP_LENGTH_MS)
+#endif
+
 #define SYSTICK_COUNTER         (FIXED_CLOCK_RATE_HZ / INT_RATE)
 
 //----------------------------------------------------------------------------------------
@@ -71,8 +81,12 @@ void Buzzer::Update() {
             break;
     }
     
+#if defined(BUZZER_CONTINUOUS_TONE)
+    LPC_GPIO_PORT->B0[gpio_] = flag_;
+#else
     state_ ^= BUZZER_MASK;
     LPC_GPIO_PORT->B0[gpio_] = state_ & flag_;
+#endif
 }
 
 void Buzzer::On() {
@@ -85,6 +99,7 @@ void Buzzer::Off() {
     SysTick->CTRL = 0;
     flag_ = 0;
     mode_ = OFF;
+    LPC_GPIO_PORT->B0[gpio_] = 0;
 }
 
 void Buzzer::Beep() {

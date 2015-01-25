@@ -180,3 +180,12 @@ Count-down timers
         Set value to full duration & start; read back value & convert to H:MM:SS for display, use callback to trigger done.
         Set a repeat MRT to expire after 1 second; use callback on that to update timer counts (simpler, less code?)
 
+Available Piezo Sounders
+========================
+Bitsbox:
+* ST013:    Murata PKM13EPYH40002 - 4kHz, external drive
+* ST045:    Emech 2048kHz - electromagnetic! 'Ware polarity, may only be up to 3V. Wire diode in reverse in parallel instead of resistor.
+* KPEG200A: Kingstate - continuous tone, just requires DC. 2600Hz - 3600Hz. 1.3mA draw.
+* ST016:    ? - continuous tone, just requires DC. 2700Hz. 4.7mA draw.
+
+
