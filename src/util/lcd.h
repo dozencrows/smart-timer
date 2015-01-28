@@ -9,6 +9,7 @@ extern void lcdSetBacklight(int value);
 extern bool lcdIsBacklightOn();
 extern void lcdMoveTo(int x, int y);
 extern void lcdPuts(const char* s);
+extern void lcdDisplayEnable(int value);
 
 #endif
 

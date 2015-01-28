@@ -228,3 +228,13 @@ void lcdMoveTo(int x, int y) {
     lcdWriteByte(LCD_SETDDRAMADDR | addr, WRITE_MODE_CMD);
 }
 
+void lcdDisplayEnable(int value) {
+    uint8_t display_control = 0;
+    
+    if (value) {
+        display_control = LCD_DISPLAYON;
+    }
+
+    lcdWriteByte(LCD_DISPLAYCONTROL | display_control, WRITE_MODE_CMD);
+}
+
