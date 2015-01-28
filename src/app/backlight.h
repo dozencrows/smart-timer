@@ -16,6 +16,7 @@ class Backlight {
         
         void On();
         void DelayedOff(uint32_t delay_ms);
+        bool IsOn();
         
     private:
     

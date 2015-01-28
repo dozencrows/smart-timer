@@ -37,3 +37,6 @@ void Backlight::DelayedOff(uint32_t delay_ms) {
     LPC_MRT->Channel[BACKLIGHT_MRT_TIMER].INTVAL  = (FIXED_CLOCK_RATE_HZ / 1000) * delay_ms | (1 << 31);
 }
 
+bool Backlight::IsOn() {
+    return lcdIsBacklightOn();
+}

@@ -59,6 +59,15 @@ static void i2cSetup () {
         error("i2c_set_timeout");
 }
 
+void deepSleep() {
+    LPC_SYSCON->STARTERP0   = 0x01; // pin interrupt 0 will wakeup 
+    LPC_PMU->PCON           = 0x01; // select deep sleep
+    SCB->SCR                = SCB_SCR_SLEEPDEEP_Msk;
+    __WFI();
+    LPC_PMU->PCON           = 0;
+    SCB->SCR                = 0;
+}
+
 int main () { 
     timersInit();
     serial.init(LPC_USART0, FIXED_UART_BAUD_RATE);
@@ -92,7 +101,12 @@ int main () {
         timer_controller.Update();
         
         if (!button_input.HasButtonStateChanged()) {
-            __WFI();
+            if (timer_controller.IsIdle() && !backlight.IsOn()) {
+                deepSleep();
+            }
+            else {
+                __WFI();
+            }
         }
     }
 }

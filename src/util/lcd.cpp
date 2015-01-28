@@ -133,6 +133,10 @@ void lcdSetBacklight(int value) {
     i2cWrite(I2C_ADDR, backlight_state);
 }
 
+bool lcdIsBacklightOn() {
+    return backlight_state != 0;
+}
+
 static const uint8_t backpack_lut[] = {
     0x00,
     1 << PIN_D4,

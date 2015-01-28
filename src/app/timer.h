@@ -30,6 +30,8 @@ class Timer {
         void AddHour();
         void AddMinute();
         void AddSecond();
+        
+        bool IsStopped() { return state_ == STOPPED; }
 
     private:
         void AddTime(uint8_t hours, uint8_t minutes, uint8_t seconds);
