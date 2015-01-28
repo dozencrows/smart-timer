@@ -11,7 +11,6 @@ Software:
 * Try custom characters
 
 Hardware:
-* Use pin 8 (PIO0_0) to drive 2N7000 MOSFET to switch LCD on & off for power saving
 * Try push/pull piezo driver with 
 * Try battery power supply options:
   * Other battery sizes
@@ -22,7 +21,12 @@ Hardware:
 
 WIP
 ---
-
+* Use pin 8 (PIO0_0) to drive switch controlling LCD on & off for power saving
+  * Tried 2N7000 MOSFET as per http://www.electronics-tutorials.ws/transistor/tran_7.html, but
+    can't get enough current through (~91mA with 3.3V on gate, ~128mA with 5V on gate).
+    * Looks like Vds vs Ids for given Vgs curves bear that out, certainly for Vgs 3.3V. But Vgs 5V should do it.
+  * Try a 2N2222 instead - be careful about R on base to ensure current is OK!
+    
 Done
 ----
 * Leave backlight on for 2 seconds on boot

@@ -84,6 +84,9 @@ int main () {
 
     lcdInit();
     
+    LPC_SWM->PINASSIGN0 |= 0xff00;          // ensure pin 8 is not assigned to UART RXD  
+    LPC_GPIO_PORT->DIR0 |= 1;               // set GPIO 0 output (to control LCD power)
+    
     Backlight       backlight;
     Buzzer          buzzer(BUZZER_GPIO);
     TimerController timer_controller(buzzer, backlight);
@@ -102,7 +105,10 @@ int main () {
         
         if (!button_input.HasButtonStateChanged()) {
             if (timer_controller.IsIdle() && !backlight.IsOn()) {
+                LPC_GPIO_PORT->B0[0] = 1;
                 deepSleep();
+                LPC_GPIO_PORT->B0[0] = 0;
+                lcdInit();
             }
             else {
                 __WFI();
