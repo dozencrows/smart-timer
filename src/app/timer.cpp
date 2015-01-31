@@ -57,7 +57,7 @@ Timer::Timer(TimerController& controller) : controller_(controller) {
     y_ = 0;
 
     state_ = STOPPED;
-    updated_ = false;
+    update_ = false;
     visible_ = true;
     
     if (timer_instance_count < MAX_TIMER_INSTANCES) {
@@ -102,7 +102,7 @@ void Timer::Reset() {
     }
     
     current_time_.all   = start_time_.all;
-    updated_            = true;
+    update_             = true;
     state_              = STOPPED;
     visible_            = true;
 }
@@ -142,7 +142,7 @@ void Timer::AddTime(uint8_t hours, uint8_t minutes, uint8_t seconds) {
         }
         
         start_time_.all = current_time_.all;
-        updated_ = true;
+        update_ = true;
     }
 }
 
@@ -166,16 +166,16 @@ void Timer::Tick() {
             controller_.Notify(*this, TimerController::ALARM_START);
         }
         
-        updated_ = true;
+        update_ = true;
     }
     else if (state_ == ALARM) {
         visible_ = !visible_;
-        updated_ = true;
+        update_ = true;
     }
 }
 
 void Timer::Update() {    
-    if (updated_) {
+    if (update_) {
         char time_text[TIME_TEXT_BUFFER_LEN];
 
         if (visible_) {        
@@ -194,7 +194,7 @@ void Timer::Update() {
         time_text[7] = '\0';
         lcdMoveTo(x_, y_);
         lcdPuts(time_text);
-        updated_ = false;
+        update_ = false;
     }
 }
 

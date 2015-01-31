@@ -32,6 +32,7 @@ class Timer {
         void AddSecond();
         
         bool IsStopped() { return state_ == STOPPED; }
+        void ForceUpdate() { update_ = true; }
 
     private:
         void AddTime(uint8_t hours, uint8_t minutes, uint8_t seconds);
@@ -56,7 +57,7 @@ class Timer {
         
         State state_;
         
-        bool updated_;
+        bool update_;
         bool visible_;
         
         friend void TimerInterruptHandler(void);

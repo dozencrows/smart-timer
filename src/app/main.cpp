@@ -109,6 +109,7 @@ int main () {
                 deepSleep();
                 LPC_GPIO_PORT->B0[0] = 0;
                 lcdInit();
+                timer_controller.ForceUpdate();
             }
             else {
                 __WFI();

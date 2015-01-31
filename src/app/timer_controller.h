@@ -24,6 +24,7 @@ class TimerController {
         void Update();
         void ProcessButtons(uint8_t button_state);
         void Notify(Timer& timer, Notification notification);
+        void ForceUpdate();
         
         bool IsIdle() { return timer1_.IsStopped() && timer2_.IsStopped(); }
         

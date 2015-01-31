@@ -25,6 +25,11 @@ void TimerController::Update() {
     timer2_.Update();
 }
 
+void TimerController::ForceUpdate() {
+    timer1_.ForceUpdate();
+    timer2_.ForceUpdate();
+}
+
 void TimerController::ProcessButtons(uint8_t button_state) {
     uint8_t buttons_changed = button_state ^ last_buttons_;
     
