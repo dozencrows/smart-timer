@@ -76,6 +76,9 @@ int main () {
     i2cSetup();
     
     LPC_SWM->PINENABLE0 |= 1<<6;            // disable RESET to allow GPIO_5 (for buzzer)
+    LPC_SWM->PINASSIGN0 |= 0xff00;          // ensure pin 8 is not assigned to UART RXD  
+    LPC_GPIO_PORT->DIR0 |= 1;               // set GPIO 0 output (to control LCD power)
+    LPC_GPIO_PORT->B0[0] = 0;
         
     Buzzer::Initialise();
     Timer::Initialise();
@@ -83,9 +86,6 @@ int main () {
     ButtonInput::Initialise();
 
     lcdInit();
-    
-    LPC_SWM->PINASSIGN0 |= 0xff00;          // ensure pin 8 is not assigned to UART RXD  
-    LPC_GPIO_PORT->DIR0 |= 1;               // set GPIO 0 output (to control LCD power)
     
     Backlight       backlight;
     Buzzer          buzzer(BUZZER_GPIO);
