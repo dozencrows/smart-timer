@@ -78,7 +78,7 @@ int main () {
     LPC_SWM->PINENABLE0 |= 1<<6;            // disable RESET to allow GPIO_5 (for buzzer)
     LPC_SWM->PINASSIGN0 |= 0xff00;          // ensure pin 8 is not assigned to UART RXD  
     LPC_GPIO_PORT->DIR0 |= 1;               // set GPIO 0 output (to control LCD power)
-    LPC_GPIO_PORT->B0[0] = 0;
+    LPC_GPIO_PORT->B0[0] = 1;
         
     Buzzer::Initialise();
     Timer::Initialise();
@@ -105,9 +105,10 @@ int main () {
         
         if (!button_input.HasButtonStateChanged()) {
             if (timer_controller.IsIdle() && !backlight.IsOn()) {
-                LPC_GPIO_PORT->B0[0] = 1;
-                deepSleep();
                 LPC_GPIO_PORT->B0[0] = 0;
+                deepSleep();
+                LPC_GPIO_PORT->B0[0] = 1;
+                delayMs(10);
                 lcdInit();
                 timer_controller.ForceUpdate();
             }
