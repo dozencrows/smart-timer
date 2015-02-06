@@ -4,6 +4,7 @@ Smart Kitchen Timer Plan
 To Do
 -----
 Software:
+* Fix too early return to sleep if button not pressed for long enough
 * Investigate intermittent I2C errors (may be hardware)
 * Replace error strings with numeric codes (memory saving)
 * Fix 'first second' inaccuracy
@@ -11,17 +12,16 @@ Software:
 * Try custom characters
 
 Hardware:
+* Try turning off I2C level shifter alongside LCD to reduce idle current draw
 * Try push/pull piezo driver
 * Try battery power supply options:
   * Other battery sizes
 * Try 2 channel level conversion breakout
-* Try other piezo sounders to get better volume
 * Custom PCB
 * Case and button covers
 
 WIP
 ---
-* Use pin 8 (PIO0_0) to drive switch controlling LCD on & off for power saving
     
 Done
 ----
@@ -44,7 +44,11 @@ Done
 * Investigate reducing power consumption further
   * Initial interrupt driven approach means already using sleep mode
   * Deep sleep mode when timers idle -> 6x reduction in power for LPC 
+* Try other piezo sounders to get better volume
 * Fix initial beep at start with continuous tone buzzer
   * Add pull-down R to transistor base
 * Add temp resistor to control continuous tone buzzer volume for dev purposes
-
+* Use pin 8 (PIO0_0) to drive switch controlling LCD on & off for power saving
+  * Initially via P-channel MOSFET IRLIB9343 (5V in to source, LCD power in to drain) - worked
+  * Replaced MOSFET with MIC2545A smart switch: worked, smaller part (but added 2 caps & 1R)
+  
