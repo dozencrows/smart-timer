@@ -44,6 +44,11 @@ void errorWithCode(const char* msg, int code) {
 
 static void i2cSetup () {
     LPC_SWM->PINENABLE0 |= 3<<2;            // disable SWCLK and SWDIO
+
+    //LPC_GPIO_PORT->B0[2] = 1;               // set GPIO status on pins 3 & 4 (PIO0_2 & PIO0_3)
+    //LPC_GPIO_PORT->B0[3] = 1;               // ready for I2C (to later support disabling)
+    //LPC_GPIO_PORT->DIR0 |= 0x0c;
+
     LPC_SWM->PINASSIGN7 = 0x02FFFFFF;       // SDA on P2, pin 4
     LPC_SWM->PINASSIGN8 = 0xFFFFFF03;       // SCL on P3, pin 3
     LPC_SYSCON->SYSAHBCLKCTRL |= (1<<5);    // enable I2C clock
@@ -59,13 +64,41 @@ static void i2cSetup () {
         error("i2c_set_timeout");
 }
 
-void deepSleep() {
+static void disableI2c() {
+    LPC_SWM->PINASSIGN7 = 0xFFFFFFFF;       // Restore pins 3 & 4 to GPIO, should be zero level
+    LPC_SWM->PINASSIGN8 = 0xFFFFFFFF;       // (PIO0_2 & PIO0_3)
+    LPC_GPIO_PORT->B0[2] = 0;
+    LPC_GPIO_PORT->B0[3] = 0;
+}
+
+static void enableI2c() {
+    LPC_GPIO_PORT->B0[2] = 1;
+    LPC_GPIO_PORT->B0[3] = 1;
+    LPC_SWM->PINASSIGN7 = 0x02FFFFFF;       // SDA on P2, pin 4
+    LPC_SWM->PINASSIGN8 = 0xFFFFFF03;       // SCL on P3, pin 3
+}
+
+static void deepSleep() {
     LPC_SYSCON->STARTERP0   = 0x01; // pin interrupt 0 will wakeup 
     LPC_PMU->PCON           = 0x01; // select deep sleep
     SCB->SCR                = SCB_SCR_SLEEPDEEP_Msk;
     __WFI();
     LPC_PMU->PCON           = 0;
     SCB->SCR                = 0;
+}
+
+static void lcdPowerOn() {
+    LPC_GPIO_PORT->B0[0] = 1;
+}
+
+static void lcdPowerOff() {
+    LPC_GPIO_PORT->B0[0] = 0;
+}
+
+static void initLcdPowerSwitch() {
+    LPC_SWM->PINASSIGN0 |= 0xff00;          // ensure pin 8 is not assigned to UART RXD  
+    LPC_GPIO_PORT->DIR0 |= 1;               // set GPIO 0 output (to control LCD power)
+    lcdPowerOn();
 }
 
 int main () { 
@@ -76,9 +109,7 @@ int main () {
     i2cSetup();
     
     LPC_SWM->PINENABLE0 |= 1<<6;            // disable RESET to allow GPIO_5 (for buzzer)
-    LPC_SWM->PINASSIGN0 |= 0xff00;          // ensure pin 8 is not assigned to UART RXD  
-    LPC_GPIO_PORT->DIR0 |= 1;               // set GPIO 0 output (to control LCD power)
-    LPC_GPIO_PORT->B0[0] = 1;
+    initLcdPowerSwitch();
         
     Buzzer::Initialise();
     Timer::Initialise();
@@ -105,9 +136,12 @@ int main () {
         
         if (!button_input.HasButtonStateChanged()) {
             if (timer_controller.IsIdle() && !backlight.IsOn()) {
-                LPC_GPIO_PORT->B0[0] = 0;
+                lcdPowerOff();
+                //disableI2c();
                 deepSleep();
-                LPC_GPIO_PORT->B0[0] = 1;
+
+                lcdPowerOn();
+                //enableI2c();
                 delayMs(10);
                 lcdInit();
                 timer_controller.ForceUpdate();

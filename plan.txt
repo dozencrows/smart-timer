@@ -5,14 +5,13 @@ To Do
 -----
 Software:
 * Fix too early return to sleep if button not pressed for long enough
-* Investigate intermittent I2C errors (may be hardware)
 * Replace error strings with numeric codes (memory saving)
 * Fix 'first second' inaccuracy
 * Try larger characters
 * Try custom characters
 
 Hardware:
-* Try turning off I2C level shifter alongside LCD to reduce idle current draw
+* Switch to 3v3 LCD display and remove level shift
 * Try push/pull piezo driver
 * Try battery power supply options:
   * Other battery sizes
@@ -22,7 +21,9 @@ Hardware:
 
 WIP
 ---
-    
+* Investigate intermittent I2C errors (may be hardware)
+  * No definite cause, but may be related to having serial cable connection with ground to PC.
+
 Done
 ----
 * Leave backlight on for 2 seconds on boot
@@ -51,4 +52,6 @@ Done
 * Use pin 8 (PIO0_0) to drive switch controlling LCD on & off for power saving
   * Initially via P-channel MOSFET IRLIB9343 (5V in to source, LCD power in to drain) - worked
   * Replaced MOSFET with MIC2545A smart switch: worked, smaller part (but added 2 caps & 1R)
-  
+* Tried turning off I2C level shifter alongside LCD to reduce idle current draw
+  * No joy here - turning off 5V side using smart switch made no difference, pulling I2C pin levels
+    to low during sleep actually increased idle draw by ~1.2mA.
