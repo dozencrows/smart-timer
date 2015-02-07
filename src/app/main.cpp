@@ -45,10 +45,6 @@ void errorWithCode(const char* msg, int code) {
 static void i2cSetup () {
     LPC_SWM->PINENABLE0 |= 3<<2;            // disable SWCLK and SWDIO
 
-    //LPC_GPIO_PORT->B0[2] = 1;               // set GPIO status on pins 3 & 4 (PIO0_2 & PIO0_3)
-    //LPC_GPIO_PORT->B0[3] = 1;               // ready for I2C (to later support disabling)
-    //LPC_GPIO_PORT->DIR0 |= 0x0c;
-
     LPC_SWM->PINASSIGN7 = 0x02FFFFFF;       // SDA on P2, pin 4
     LPC_SWM->PINASSIGN8 = 0xFFFFFF03;       // SCL on P3, pin 3
     LPC_SYSCON->SYSAHBCLKCTRL |= (1<<5);    // enable I2C clock
@@ -62,20 +58,6 @@ static void i2cSetup () {
 
     if (LPC_I2CD_API->i2c_set_timeout(ih, 100000) != LPC_OK)
         error("i2c_set_timeout");
-}
-
-static void disableI2c() {
-    LPC_SWM->PINASSIGN7 = 0xFFFFFFFF;       // Restore pins 3 & 4 to GPIO, should be zero level
-    LPC_SWM->PINASSIGN8 = 0xFFFFFFFF;       // (PIO0_2 & PIO0_3)
-    LPC_GPIO_PORT->B0[2] = 0;
-    LPC_GPIO_PORT->B0[3] = 0;
-}
-
-static void enableI2c() {
-    LPC_GPIO_PORT->B0[2] = 1;
-    LPC_GPIO_PORT->B0[3] = 1;
-    LPC_SWM->PINASSIGN7 = 0x02FFFFFF;       // SDA on P2, pin 4
-    LPC_SWM->PINASSIGN8 = 0xFFFFFF03;       // SCL on P3, pin 3
 }
 
 static void deepSleep() {
@@ -128,8 +110,7 @@ int main () {
     
     while (true) {
         while (button_input.HasButtonStateChanged()) {
-            uint8_t buttons = button_input.GetButtonStates();
-            timer_controller.ProcessButtons(buttons);
+            timer_controller.ProcessButtons(button_input.GetButtonStates());
         }
 
         timer_controller.Update();
@@ -137,12 +118,15 @@ int main () {
         if (!button_input.HasButtonStateChanged()) {
             if (timer_controller.IsIdle() && !backlight.IsOn()) {
                 lcdPowerOff();
-                //disableI2c();
                 deepSleep();
 
                 lcdPowerOn();
-                //enableI2c();
                 delayMs(10);
+                
+                if (button_input.HasButtonStateChanged()) {
+                    timer_controller.ProcessButtons(button_input.GetButtonStates());
+                }
+                
                 lcdInit();
                 timer_controller.ForceUpdate();
             }

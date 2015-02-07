@@ -4,7 +4,6 @@ Smart Kitchen Timer Plan
 To Do
 -----
 Software:
-* Fix too early return to sleep if button not pressed for long enough
 * Replace error strings with numeric codes (memory saving)
 * Fix 'first second' inaccuracy
 * Try larger characters
@@ -55,3 +54,5 @@ Done
 * Tried turning off I2C level shifter alongside LCD to reduce idle current draw
   * No joy here - turning off 5V side using smart switch made no difference, pulling I2C pin levels
     to low during sleep actually increased idle draw by ~1.2mA.
+* Fix too early return to sleep if button not pressed for long enough
+
