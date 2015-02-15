@@ -10,11 +10,8 @@ Software:
 * Try custom characters
 
 Hardware:
-* Switch to 3v3 LCD display and remove level shift
-* Try push/pull piezo driver
 * Try battery power supply options:
   * Other battery sizes
-* Try 2 channel level conversion breakout
 * Custom PCB
 * Case and button covers
 
@@ -55,4 +52,8 @@ Done
   * No joy here - turning off 5V side using smart switch made no difference, pulling I2C pin levels
     to low during sleep actually increased idle draw by ~1.2mA.
 * Fix too early return to sleep if button not pressed for long enough
+* Try 2 channel level conversion breakout
+  * This works, but has a current leakage in idle mode of around ~0.46 mA, which means total idle draw ~0.8ma.
+* Switch to 3v3 LCD display and remove level shift
+  * This works, and avoids current leakage - idle draw now ~0.49 mA total
 
