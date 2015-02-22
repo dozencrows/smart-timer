@@ -1,3 +1,10 @@
+//=======================================================================
+// Copyright Nicholas Tuckett 2015.
+// Distributed under the MIT License.
+// (See accompanying file license.txt or copy at
+//  http://opensource.org/licenses/MIT)
+//=======================================================================
+
 /*
  * Timer Controller: object that manages the interaction between the UI and the timers
  */

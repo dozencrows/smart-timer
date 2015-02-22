@@ -1,3 +1,10 @@
+//=======================================================================
+// Copyright Nicholas Tuckett 2015.
+// Distributed under the MIT License.
+// (See accompanying file license.txt or copy at
+//  http://opensource.org/licenses/MIT)
+//=======================================================================
+
 /*
  * Implementation of MCP23008 and MCP23017 GPIO expander interfacing
  */

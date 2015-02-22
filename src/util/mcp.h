@@ -1,3 +1,10 @@
+//=======================================================================
+// Copyright Nicholas Tuckett 2015.
+// Distributed under the MIT License.
+// (See accompanying file license.txt or copy at
+//  http://opensource.org/licenses/MIT)
+//=======================================================================
+
 /* MCP23008 & MCP23017 GPIO Extender Module */
 #if !defined(__MCP_H__)
 #define __MCP_H__

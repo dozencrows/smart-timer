@@ -1,3 +1,10 @@
+//=======================================================================
+// Copyright Nicholas Tuckett 2015.
+// Distributed under the MIT License.
+// (See accompanying file license.txt or copy at
+//  http://opensource.org/licenses/MIT)
+//=======================================================================
+
 /*
 
  Module for controlling LCDs via I2C backpack from Bitsbox
