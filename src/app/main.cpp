@@ -67,9 +67,25 @@ static void i2cSetup () {
         error("i2c_set_timeout");
 }
 
+static void configureLowPowerPins() {
+    // Set PIO0_10 and 11 as low outputs, as they float.
+    // This saves some power
+    LPC_GPIO_PORT->DIR0 |= 3 << 10;
+    LPC_GPIO_PORT->CLR0  = 3 << 10;
+}
+
 static void deepSleep() {
     LPC_SYSCON->STARTERP0   = 0x01; // pin interrupt 0 will wakeup 
     LPC_PMU->PCON           = 0x01; // select deep sleep
+    SCB->SCR                = SCB_SCR_SLEEPDEEP_Msk;
+    __WFI();
+    LPC_PMU->PCON           = 0;
+    SCB->SCR                = 0;
+}
+
+static void powerDown() {
+    LPC_SYSCON->STARTERP0   = 0x01; // pin interrupt 0 will wakeup 
+    LPC_PMU->PCON           = 0x02; // select power down
     SCB->SCR                = SCB_SCR_SLEEPDEEP_Msk;
     __WFI();
     LPC_PMU->PCON           = 0;
@@ -90,7 +106,8 @@ static void initLcdPowerSwitch() {
     lcdPowerOn();
 }
 
-int main () { 
+int main () {
+    configureLowPowerPins(); 
     timersInit();
     serial.init(LPC_USART0, FIXED_UART_BAUD_RATE);
     delayMs(100);
@@ -125,7 +142,7 @@ int main () {
         if (!button_input.HasButtonStateChanged()) {
             if (timer_controller.IsIdle() && !backlight.IsOn()) {
                 lcdPowerOff();
-                deepSleep();
+                powerDown();
 
                 lcdPowerOn();
                 delayMs(10);
