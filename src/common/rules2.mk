@@ -7,7 +7,7 @@ TTY ?= /dev/ttyUSB*
 SERIAL ?= -term
 
 # use the arm cross compiler, not std gcc
-TRGT = /home/ntuckett/NXP-LPC/gcc-arm-none-eabi-4_9-2014q4/bin/arm-none-eabi-
+TRGT = ../../../gcc-arm-none-eabi-4_9-2014q4/bin/arm-none-eabi-
 CC = $(TRGT)gcc
 CXX = $(TRGT)g++
 CP = $(TRGT)objcopy
