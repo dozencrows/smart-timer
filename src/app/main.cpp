@@ -5,6 +5,26 @@
 //  http://opensource.org/licenses/MIT)
 //=======================================================================
 
+// Port & pin usage:
+//	Pin	Port	Dir	    Usage			        Pull	Default
+//	-----------------------------------------------------------------
+//	1	PIO0_5	In	    Reset			        Up	    Reset (in)
+//	2	PIO0_4	Out	    Buzzer on/off, UART TXD	Up	    PIO0_4 (in), UART TXD in ISP
+//	3	SCL	    Out	    I2C			            Up	    SWDIO
+//	4	SDA	    In/Out	I2C			            Up	    SWCLK
+//	5	PIO0_1	In	    Button interrupt	    Up	    PIO0_1 (in), ISP if low on reset
+//	6	VDD		        Power
+//	7	VSS		        Ground
+//	8	PIO0_0	Out	    LCD power		        Up	    PIO0_0 (in), UART RXD in ISP
+//
+
+// Programming mode means:
+//  Switch LCD power connection to UART RXD (and force actual power switch to high)
+//  Switch Buzzer connection to UART TXD
+
+// Debugging mode means
+//  Switch Buzzer connection to UART TXD
+
 #include "string.h"
 #include "serial.h"
 
@@ -20,8 +40,13 @@
 #include "backlight.h"
 #include "button_input.h"
 
+
+// Set this define to add debugging aids in code, and configure UART
+// output to replace buzzer control
+//#define DEBUG
+
 #define LOOP_STEP_MS        64
-#define BUZZER_GPIO         5
+#define BUZZER_GPIO         4
 #define INPUT_I2C_ADDR      0x20
 
 uint32_t SystemMainClock = FIXED_CLOCK_RATE_HZ;
@@ -107,6 +132,14 @@ static void initLcdPowerSwitch() {
 }
 
 int main () {
+#if defined(DEBUG)
+    // Ensure UART TXD is on 
+    LPC_SWM->PINASSIGN0 &= 0xffffff00;
+    LPC_SWM->PINASSIGN0 |= 0x00000004;
+#else
+    LPC_SWM->PINASSIGN0 |= 0xff;
+#endif
+
     configureLowPowerPins(); 
     timersInit();
     serial.init(LPC_USART0, FIXED_UART_BAUD_RATE);
@@ -114,7 +147,6 @@ int main () {
     puts("Smart Timer");
     i2cSetup();
     
-    LPC_SWM->PINENABLE0 |= 1<<6;            // disable RESET to allow GPIO_5 (for buzzer)
     initLcdPowerSwitch();
         
     Buzzer::Initialise();
