@@ -77,6 +77,9 @@ void errorWithCode(const char* msg, int code) {
 static void i2cSetup () {
     LPC_SWM->PINENABLE0 |= 3<<2;            // disable SWCLK and SWDIO
 
+    // Keep internal pull-ups on I2C pins, as this works and is less
+    // power draining when LCD off and in low power state
+    
     LPC_SWM->PINASSIGN7 = 0x02FFFFFF;       // SDA on P2, pin 4
     LPC_SWM->PINASSIGN8 = 0xFFFFFF03;       // SCL on P3, pin 3
     LPC_SYSCON->SYSAHBCLKCTRL |= (1<<5);    // enable I2C clock
