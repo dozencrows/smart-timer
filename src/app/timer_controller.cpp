@@ -15,9 +15,9 @@
 #include "backlight.h"
 
 #define BUTTON_H        0x08
-#define BUTTON_M        0x04
+#define BUTTON_M        0x01
 #define BUTTON_S        0x02
-#define BUTTON_START    0x01
+#define BUTTON_START    0x04
 
 TimerController::TimerController(Buzzer& buzzer, Backlight& backlight) : buzzer_(buzzer), backlight_(backlight), timer1_(*this), timer2_(*this){
     last_buttons_ = 0;
@@ -36,6 +36,8 @@ void TimerController::ForceUpdate() {
     timer1_.ForceUpdate();
     timer2_.ForceUpdate();
 }
+
+extern void errorWithCode(const char* msg, int code);
 
 void TimerController::ProcessButtons(uint8_t button_state) {
     uint8_t buttons_changed = button_state ^ last_buttons_;
