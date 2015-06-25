@@ -182,8 +182,11 @@ int main () {
                 lcdPowerOn();
                 delayMs(10);
                 
+                backlight.On();
+                buzzer.Beep();
+                
                 if (button_input.HasButtonStateChanged()) {
-                    timer_controller.ProcessButtons(button_input.GetButtonStates());
+                    button_input.DiscardNextState();
                 }
                 
                 lcdInit();

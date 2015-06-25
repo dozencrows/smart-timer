@@ -23,6 +23,7 @@ class ButtonInput {
         
         uint8_t GetButtonStates();
         bool HasButtonStateChanged();
+        void DiscardNextState();
         
     private:
         uint8_t i2c_addr_;

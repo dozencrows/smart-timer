@@ -60,6 +60,11 @@ uint8_t ButtonInput::GetButtonStates() {
     return button_state_;
 }
 
+void ButtonInput::DiscardNextState()
+{
+    GetButtonStates();
+}
+
 bool ButtonInput::HasButtonStateChanged() {
     return buttonIRQCount > 0;
 }
