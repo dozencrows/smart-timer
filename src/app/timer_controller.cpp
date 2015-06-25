@@ -87,6 +87,7 @@ void TimerController::Notify(Timer& timer, Notification notification) {
     switch(notification) {
         case ALARM_START:
             buzzer_.Beeps();
+            backlight_.On();
             break;
         case ALARM_STOP:
             buzzer_.Off();
