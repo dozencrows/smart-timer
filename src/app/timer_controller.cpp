@@ -45,9 +45,7 @@ void TimerController::ProcessButtons(uint8_t button_state) {
     ProcessTimerButtons(button_state >> 4, buttons_changed >> 4, timer1_);
     ProcessTimerButtons(button_state & 0xf, buttons_changed & 0xf, timer2_);
     
-    if (buttons_changed && (button_state == 0)) {
-        backlight_.DelayedOff(BACKLIGHT_ON_TIME_MS);
-    }
+    backlight_.DelayedOff(BACKLIGHT_ON_TIME_MS);
     
     last_buttons_ = button_state;
 }
@@ -57,28 +55,32 @@ void TimerController::ProcessTimerButtons(uint8_t button_state, uint8_t buttons_
     
     if (buttons_pressed) {
         buzzer_.Beep();
-        backlight_.On();
-        if (buttons_pressed & BUTTON_START) {
-            timer.ToggleStartStop();
-        }
-        else if (buttons_pressed & (BUTTON_H|BUTTON_M|BUTTON_S)) {
-            uint8_t time_buttons = button_state & (BUTTON_H|BUTTON_M|BUTTON_S);
-            if (time_buttons != BUTTON_H && time_buttons != BUTTON_M && time_buttons != BUTTON_S) {
-                timer.Clear();
+        if (backlight_.IsOn()) {
+            if (buttons_pressed & BUTTON_START) {
+                timer.ToggleStartStop();
             }
-            else {
-                switch(time_buttons) {
-                    case BUTTON_H:
-                        timer.AddHour();
-                        break;
-                    case BUTTON_M:
-                        timer.AddMinute();
-                        break;
-                    case BUTTON_S:
-                        timer.AddSecond();
-                        break;
+            else if (buttons_pressed & (BUTTON_H|BUTTON_M|BUTTON_S)) {
+                uint8_t time_buttons = button_state & (BUTTON_H|BUTTON_M|BUTTON_S);
+                if (time_buttons != BUTTON_H && time_buttons != BUTTON_M && time_buttons != BUTTON_S) {
+                    timer.Clear();
+                }
+                else {
+                    switch(time_buttons) {
+                        case BUTTON_H:
+                            timer.AddHour();
+                            break;
+                        case BUTTON_M:
+                            timer.AddMinute();
+                            break;
+                        case BUTTON_S:
+                            timer.AddSecond();
+                            break;
+                    }
                 }
             }
+        }
+        else {
+            backlight_.On();
         }
     }    
 }

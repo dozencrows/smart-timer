@@ -205,6 +205,11 @@ void lcdInit() {
     lcdWriteNybble(0x02, WRITE_MODE_CMD);
     delayUs(150);
     
+    // Set up display mode
+    uint8_t display_function = LCD_2LINE | LCD_5x8DOTS;    
+    lcdWriteByte(LCD_FUNCTIONSET | display_function, WRITE_MODE_CMD);
+    delayUs(60);
+        
     uint8_t display_control = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF;
     lcdWriteByte(LCD_DISPLAYCONTROL | display_control, WRITE_MODE_CMD);
 
