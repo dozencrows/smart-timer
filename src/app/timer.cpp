@@ -181,9 +181,33 @@ void Timer::Tick() {
     }
 }
 
+static const char barChars[] = { 0x20, 0x08, 0x09, 0x0a, 0x0b, 0x0c };
+
+void Timer::DrawBar(uint8_t x, uint8_t y, uint8_t val)
+{
+    int barCharCount = 0;
+    lcdMoveTo(x, y);
+    
+    while (val >= 5) {
+        lcdPutchar(0x0c);
+        barCharCount++;
+        val -= 5;
+    }
+
+    if (val > 0) {
+        lcdPutchar(barChars[val]);
+        barCharCount++;
+    }
+    
+    while (barCharCount++ < 7) {
+        lcdPutchar(0x20);
+    }
+}
+
 void Timer::Update() {    
     if (update_) {
         char time_text[TIME_TEXT_BUFFER_LEN];
+        int barValue = 0;
 
         if (visible_) {        
             time_text[0] = current_time_.hours + '0';
@@ -191,6 +215,19 @@ void Timer::Update() {
             Time2DigitsToAscii(current_time_.minutes, time_text + 2);
             time_text[4] = ':';
             Time2DigitsToAscii(current_time_.seconds, time_text + 5);
+            
+            if (state_ == ALARM) {
+                barValue = 35;
+            }
+            else if (current_time_.hours) {
+                barValue = current_time_.hours * 2;
+            }
+            else if (current_time_.minutes) {
+                barValue = (current_time_.minutes + 1) / 2;
+            }
+            else {
+                barValue = (current_time_.seconds + 1) / 2;
+            }
         }
         else {
             uint32_t* blank_text = (uint32_t*)time_text;
@@ -201,6 +238,9 @@ void Timer::Update() {
         time_text[7] = '\0';
         lcdMoveTo(x_, y_);
         lcdPuts(time_text);
+        
+        DrawBar(x_, y_ + 1, barValue);
+        
         update_ = false;
     }
 }

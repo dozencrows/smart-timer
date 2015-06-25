@@ -44,6 +44,7 @@ class Timer {
     private:
         void AddTime(uint8_t hours, uint8_t minutes, uint8_t seconds);
         void Tick();
+        void DrawBar(uint8_t x, uint8_t y, uint8_t val);
         
         union TimeVal {
             struct {

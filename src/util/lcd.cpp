@@ -201,22 +201,27 @@ void lcdInit() {
     lcdWriteNybble(0x03, WRITE_MODE_CMD);
     delayUs(150);
 
-    // finally, set to 4-bit interface
+    // finally, set to 4-bit interface and display mode (fixed at 2 line, 5x8 dots)
     lcdWriteNybble(0x02, WRITE_MODE_CMD);
     delayUs(150);
     
-    // Set up display mode
-    uint8_t display_function = LCD_2LINE | LCD_5x8DOTS;    
-    lcdWriteByte(LCD_FUNCTIONSET | display_function, WRITE_MODE_CMD);
-    delayUs(60);
-    
-    uint8_t display_control = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF;;
+    uint8_t display_control = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF;
     lcdWriteByte(LCD_DISPLAYCONTROL | display_control, WRITE_MODE_CMD);
 
     lcdClear();    
     
     uint8_t display_mode = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT;
     lcdWriteByte(LCD_ENTRYMODESET | display_mode, WRITE_MODE_CMD);
+    
+    lcdWriteByte(LCD_SETCGRAMADDR, WRITE_MODE_CMD);
+    uint8_t b = 0;
+    for (int i = 0; i < 5; i++) {
+        b >>= 1;
+        b |= 0x10;
+        for (int j = 0; j < 8; j++) {
+            lcdWriteByte(b, WRITE_MODE_DATA);
+        }
+    }
 }
 
 void lcdClear() {
@@ -228,6 +233,10 @@ void lcdPuts(const char* s) {
     while (*s) {
         lcdWriteByte(*s++, WRITE_MODE_DATA);
     }
+}
+
+void lcdPutchar(const char c) {
+    lcdWriteByte(c, WRITE_MODE_DATA);
 }
 
 void lcdMoveTo(int x, int y) {
